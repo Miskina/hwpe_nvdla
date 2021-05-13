@@ -1,0 +1,8 @@
+version: "3.9"
+services:
+    nvdla:
+        build: .
+        tty: true
+        stdin_open: true
+        volumes:
+            - .:/root/nvdla/hw

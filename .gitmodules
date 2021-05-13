@@ -1,0 +1,3 @@
+[submodule "nvdla_hw"]
+	path = nvdla_hw
+	url = git@github.com:Miskina/nvdla_hw.git

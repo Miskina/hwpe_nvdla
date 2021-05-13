@@ -1,0 +1,18 @@
+[options]
+mode bmc
+
+[engines]
+smtbmc
+
+[script]
+read -formal periph_to_csb.sv
+read -formal hwpe_ctrl_intf_periph.sv
+read -formal nvdla_csb_intf.sv
+read -formal periph_to_csb_wrapper.sv
+prep -top periph_to_csb_wrapper
+
+[files]
+../test/periph_to_csb_wrapper.sv
+../src/periph_to_csb.sv
+../intf/hwpe_ctrl_intf_periph.sv
+../intf/nvdla_csb_intf.sv
