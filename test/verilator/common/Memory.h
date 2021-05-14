@@ -1,25 +1,32 @@
-#ifndef MEMORY_H
-#define MEMORY_H
+#ifndef HWPE_NVDLA_MEMORY_H
+#define HWPE_NVDLA_MEMORY_H
 
 #include <type_traits>
 #include <cstdint>
 #include <unordered_map>
 #include <vector>
 #include <cassert>
+#include <string>
 
 #define PAGE_SIZE 4096
 
-template<typename AddressType = uint32_t,
-         size_t BlockSize = PAGE_SIZE>
+template<size_t BlockSize = PAGE_SIZE>
 class Memory
 {
-    static_assert(std::is_integral<AddressType>::value, "AddressType must be an integral type!");
+    static_assert(BlockSize % alignof(int) == 0, "The block size must be at least aligned to int");
 
 public:
 
-    template<typename DataType>
+    Memory(std::string&& name) noexcept 
+        : name_(std::forward<std::string>(name))
+    {
+    }
+
+    template<typename DataType, typename AddressType>
     DataType read(AddressType address) const noexcept
     {
+        static_assert(std::is_integral<AddressType>::value,
+                      "AddressType must be an integral type!");
         static_assert(std::is_integral<DataType>::value,
                       "The DataType must be an integral type!");
 
@@ -38,18 +45,22 @@ public:
             return value;
         }
 
+        const int to_aligned = alignof(DataType) - misalignment;
         value >>= misalignment * 8;
-        value |= read<DataType>(address + alignof(DataType) - misalignment) << misalignment * 8;
+        value |= read<DataType>(address + to_aligned) << to_aligned * 8;
 
         return value;
     }
 
-    template<typename DataType>
+
+    template<typename AddressType, typename DataType>
     void write(AddressType address, DataType data) noexcept
     {
         static_assert(std::is_integral<DataType>::value,
                       "The DataType must be an integral type!");
-        
+        static_assert(std::is_integral<AddressType>::value,
+                      "AddressType must be an integral type!");
+
         auto& mem_block = ram_[address / BlockSize];
         mem_block.resize(BlockSize, 0);
 
@@ -63,24 +74,31 @@ public:
             *mem_block_data = data;
             return;
         }
-
+        
+        // Avoid bug with type inference automating to int for integer literals.
+        // Otherwise the mask is 0 for misalignment larger than 3 (which can happen with 64-bit integers) 
+        constexpr DataType one = 1;
 
         DataType value = data << misalignment * 8;
-        DataType mask = (1 << (misalignment * 8)) - 1;
+        DataType mask = (one << (misalignment * 8)) - one;
         *mem_block_data &= mask;
         *mem_block_data |= value;            
 
-        const AddressType next_addr = aligned_address + alignof(DataType);
-        DataType next_data = (read<DataType>(next_addr) & ~mask) | (data >> ((alignof(DataType) - misalignment) * 8));
+        const int to_aligned = alignof(DataType) - misalignment;
+        const AddressType next_addr = address + to_aligned; 
+        DataType next_data = (read<DataType>(next_addr) & ~mask) | (data >> (to_aligned * 8));
 
         write(next_addr, next_data);
     }
 
+
 private:
 
-    std::unordered_map<AddressType, std::vector<uint8_t>> ram_;
+    size_t page_size_;
+    std::unordered_map<uint32_t, std::vector<uint8_t>> ram_;
+    std::string name_;
 
 };
 
 
-#endif // MEMORY_H
+#endif // HWPE_NVDLA_MEMORY_H
