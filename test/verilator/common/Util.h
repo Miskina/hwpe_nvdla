@@ -1,9 +1,20 @@
 #include <utility>
 #include <cstdio>
 
+#define HWPE_NVDLA_MACRO_START do {
+#define HWPE_NVDLA_MACRO_END } while(0)
 
 namespace util
 {
+
+	template<typename T>
+	inline void delete_if(T* obj)
+	{
+		if(obj)
+		{
+			delete obj;
+		}
+	}
 
 	template<typename ... Ts>
 	struct Release
