@@ -6,40 +6,41 @@ interface nvdla_dbb_intf #(
 ) (
     input logic clk
 );
+    localparam NVDLA_DBB_W_STRB_WIDTH = NVDLA_DBB_W_DATA_WIDTH / 8;
     // AW (Write request) channel
-    logic                                 aw_valid;
-    logic                                 aw_ready;
-    logic [3:0]                           aw_len;
-    logic [NVDLA_DBB_WRITE_ADDR_SIZE-1:0] aw_addr;
-    logic [7:0]                           aw_id;
+    logic                               aw_valid;
+    logic                               aw_ready;
+    logic [3:0]                         aw_len;
+    logic [NVDLA_DBB_AW_ADDR_WIDTH-1:0] aw_addr;
+    logic [7:0]                         aw_id;
 
     // AR (Read request) channel
-    logic                                 ar_valid;
-    logic                                 ar_ready;
-    logic [3:0]                           ar_len;
-    logic [NVDLA_DBB_READ_ADDR_SIZE-1:0]  aw_addr;
-    logic [7:0]                           ar_id;
+    logic                               ar_valid;
+    logic                               ar_ready;
+    logic [3:0]                         ar_len;
+    logic [NVDLA_DBB_AR_ADDR_WIDTH-1:0] ar_addr;
+    logic [7:0]                         ar_id;
 
     // W (Write) channel
-    logic                                 w_valid;
-    logic                                 w_ready;
-    logic [NVDLA_DBB_W_DATA_WIDTH-1:0]    w_data;
-    logic                                 w_last;
-    logic [NVDLA_DBB_W_STRB_WIDTH-1:0]    w_strb;
+    logic                               w_valid;
+    logic                               w_ready;
+    logic [NVDLA_DBB_W_DATA_WIDTH-1:0]  w_data;
+    logic                               w_last;
+    logic [NVDLA_DBB_W_STRB_WIDTH-1:0]  w_strb;
 
     // B (Write response) channel
-    logic                                 b_valid;
-    logic                                 b_ready;
-    logic [7:0]                           b_id;
+    logic                               b_valid;
+    logic                               b_ready;
+    logic [7:0]                         b_id;
 
     // R (Read data channel)
-    logic                                 r_valid;
-    logic                                 r_ready;
-    logic                                 r_last;
-    logic [NVDLA_DBB_R_DATA_WIDTH-1:0]    r_data;
-    logic [7:0]                           r_id;
+    logic                               r_valid;
+    logic                               r_ready;
+    logic                               r_last;
+    logic [NVDLA_DBB_R_DATA_WIDTH-1:0]  r_data;
+    logic [7:0]                         r_id;
 
-    modport nvdla (   
+    modport master (   
         // AW
         input  aw_ready,
         output aw_valid, aw_len, aw_addr, aw_id,
@@ -61,7 +62,7 @@ interface nvdla_dbb_intf #(
         output r_ready
     );
 
-    modport dbb (   
+    modport slave (   
         // AW
         input  aw_valid, aw_len, aw_addr, aw_id,
         output aw_ready,
