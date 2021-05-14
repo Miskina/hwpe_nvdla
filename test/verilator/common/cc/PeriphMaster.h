@@ -1,5 +1,5 @@
-#ifndef PERIPH_MASTER_H
-#define PERIPH_MASTER_H
+#ifndef HWPE_NVDLA_PERIPH_MASTER_H
+#define HWPE_NVDLA_PERIPH_MASTER_H
 
 #include <cstdint>
 #include <cstdio>
@@ -9,13 +9,13 @@
 #include <verilated.h>
 
 
-#include "../PeriphOp.h"
+#include "../ControlOperation.h"
 
 struct PeriphVerifier
 {
 
     template<typename Slave>
-    bool operator()(const PeriphOp& op, Slave* slave) noexcept
+    bool operator()(const ControlOperation& op, Slave* slave) noexcept
     {
         if(slave->r_valid && last_op_.id != slave->periph_r_id)
         {
@@ -67,7 +67,7 @@ private:
         printf("[PeriphVeriph (%lu)] - [Error]: %s", time, msg);
     }
 
-    PeriphOp last_op_{};
+    ControlOperation last_op_{};
     bool request_granted_;
     uint64_t request_time_;
 };
@@ -88,8 +88,8 @@ public:
     void eval(bool is_noop = false) noexcept
     {
         is_noop = is_noop || op_queue_.empty();
-        static PeriphOp noop{};
-        const PeriphOp& op = is_noop ? noop : op_queue_.front();
+        static ControlOperation noop{};
+        const ControlOperation& op = is_noop ? noop : op_queue_.front();
 
         *slave_.req  = is_noop ? 0 : 1;
         *slave_.add  = op.addr;
@@ -112,11 +112,11 @@ public:
 private:
 
     const char* name_;
-    std::queue<PeriphOp> op_queue_;
+    std::queue<ControlOperation> op_queue_;
     PeriphVerifier verify_;
     PeriphConnections slave_;
 
 };
 
 
-#endif // PERIPH_MASTER_H
+#endif // HWPE_NVDLA_PERIPH_MASTER_H

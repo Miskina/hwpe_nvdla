@@ -1,12 +1,12 @@
-#ifndef PERIPH_MASTER_H
-#define PERIPH_MASTER_H
+#ifndef HWPE_NVDLA_PERIPH_MASTER_H
+#define HWPE_NVDLA_PERIPH_MASTER_H
 
 #include <systemc.h>
 
 #include <queue>
 #include <cstdio>
 
-#include "../common/PeriphOp.h"
+#include "../ControlOperation.h"
 
 
 // template<unsigned int IdWidth = 32>
@@ -52,7 +52,7 @@ public:
 
             wait();
 
-            const PeriphOp& op = op_queue.front();
+            const ControlOperation& op = op_queue.front();
 
             req  = !op.is_noop();
             add  = op.addr;
@@ -81,9 +81,9 @@ public:
 
 private:
 
-    std::queue<PeriphOp> op_queue{};
+    std::queue<ControlOperation> op_queue{};
     
 };
 
 
-#endif // PERIPH_MASTER_H
+#endif // HWPE_NVDLA_PERIPH_MASTER_H
