@@ -29,7 +29,7 @@ int main(int argc, const char **argv, char **env) {
 	Vperiph_to_nvdla *dla = new Vperiph_to_nvdla{"TOP"};
     PeriphMaster* periph = new PeriphMaster{"PeriphMaster"};
 	
-	AXIResponder::connections dbbconn = {
+	AxiMemoryController::connections dbbconn = {
 		.aw_awvalid = &dla->dbb_aw_awvalid,
 		.aw_awready = &dla->dbb_aw_awready,
 		.aw_awid    = &dla->dbb_aw_awid,
@@ -58,7 +58,7 @@ int main(int argc, const char **argv, char **env) {
 		.r_rlast  = &dla->dbb_r_rlast,
 		.r_rdata  = &dla->dbb_r_rdata,
 	};
-	AXIResponder* axi_dbb = new AXIResponder(dbbconn, "DBB");
+	AxiMemoryController* axi_dbb = new AxiMemoryController(dbbconn, "DBB");
 
 	TraceLoader* trace = new TraceLoader(csb, axi_dbb, axi_cvsram);
 

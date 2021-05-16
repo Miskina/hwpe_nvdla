@@ -1,8 +1,8 @@
-#include "AXIResponder.h"
+#include "AxiMemoryController.h"
 #include <verilated.h>
 
 
-AXIResponder::AXIResponder(AXIResponder::connections _dla, const char *_name) noexcept
+AxiMemoryController::AxiMemoryController(AxiMemoryController::connections _dla, const char *_name) noexcept
 {
     dla = _dla;
     
@@ -32,21 +32,31 @@ AXIResponder::AXIResponder(AXIResponder::connections _dla, const char *_name) no
     }
 }
 
-uint8_t AXIResponder::read(uint32_t addr)
+void AxiMemoryController::read(uint32_t addr, uint8_t* data, uint32_t data_len)
 {
-    ram[addr / AXI_BLOCK_SIZE].resize(AXI_BLOCK_SIZE, 0);
-    return ram[addr / AXI_BLOCK_SIZE][addr % AXI_BLOCK_SIZE];
+    for (int i = 0; i < data_len; ++i)
+    {
+        data[i] = ram.read(addr + i);
+    }
 }
 
 
-void AXIResponder::write(uint32_t addr, uint8_t data)
+void AxiMemoryController::write(uint32_t addr, uint8_t* data, uint32_t data_len)
 {
-    ram[addr / AXI_BLOCK_SIZE].resize(AXI_BLOCK_SIZE, 0);
-    ram[addr / AXI_BLOCK_SIZE][addr % AXI_BLOCK_SIZE] = data;
+    for (int i = 0; i < data_len; ++i)
+    {
+        ram.write(addr + i, data[i])
+    }
 }
 
 
-void AXIResponder::eval()
+bool AxiMemoryController::is_ready()
+{
+    return true;
+}
+
+
+void AxiMemoryController::eval()
 {
     /* write request */
     if (*dla.aw_awvalid && *dla.aw_awready)
@@ -100,10 +110,7 @@ void AXIResponder::eval()
         
             for (int i = 0; i < AXI_WIDTH / AXI_WDATA_TYLEN; i++)
             {
-                AXI_WDATA_TYPE da = 0;
-                for (int j = 0; j < AXI_WDATA_TYLEN / 8; j++)
-                    da |= ((uint64_t)read(addr + i * (AXI_WDATA_TYLEN / 8) + j)) << (j * 8);
-                txn.rdata[i] = da;
+                txn.rdata[i] = ram.read(addr + i * (AXI_WDATA_TYLEN / 8));
             }
 
             r_fifo.push(txn);
@@ -147,8 +154,8 @@ void AXIResponder::eval()
         {
             if (!((wtxn.wstrb >> i) & 1))
                 continue;
-            
-            write(awtxn.awaddr + i, (wtxn.wdata[i / (AXI_WDATA_TYLEN / 8)] >> ((i % (AXI_WDATA_TYLEN / 8)) * 8)) & 0xFF);
+            uint8_t data = (wtxn.wdata[i / (AXI_WDATA_TYLEN / 8)] >> ((i % (AXI_WDATA_TYLEN / 8)) * 8)) & 0xFF;
+            write(awtxn.awaddr + i, &data, 1);
         }
         
         

@@ -58,7 +58,7 @@ class TraceLoader
 	std::map<uint32_t, syncpt_op> syncpts;
 	
 	CSBMaster *csb;
-	AXIResponder *axi_dbb;
+	AxiMemoryController *axi_dbb;
 	
 	int _test_passed;
 
@@ -71,7 +71,7 @@ public:
 		TRACE_SYNCPT_MASK = 0x80000000
 	};
 
-	TraceLoader(CSBMaster *_csb, AXIResponder *_axi_dbb) noexcept;
+	TraceLoader(CSBMaster *_csb, AxiMemoryController *_axi_dbb) noexcept;
 	
 	void load(const char *fname);
 	

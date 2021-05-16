@@ -1,5 +1,5 @@
-#ifndef AXI_RESPONDER_H
-#define AXI_RESPONDER_H
+#ifndef AXI_MEMORY_CONTROLLER_H
+#define AXI_MEMORY_CONTROLLER_H
 
 #include <queue>
 #include <cstdio>
@@ -8,13 +8,16 @@
 #include <vector>
 #include <cstdlib>
 
+#include "Memory.h"
+#include "MemoryController.h"
+
 #ifndef NVDLA_MEM_ADDRESS_WIDTH
     #define NVDLA_MEM_ADDRESS_WIDTH 64
 #endif
 
 #define NVDLA_PRIMARY_MEMIF_WIDTH 64
 
-class AXIResponder {
+class AxiMemoryController : public MemoryController {
 public:
 #if NVDLA_PRIMARY_MEMIF_WIDTH == 64
 #	define AXI_WDATA_TYPE uint64_t
@@ -113,21 +116,23 @@ private:
 	
     std::queue<axi_b_txn> b_fifo;
 	
-	std::map<uint32_t, std::vector<uint8_t> > ram;
+	Memory<>* ram;
 	
 	connections dla;
 	const char *name;
 	
 public:	
-	AXIResponder(connections _dla, const char *_name) noexcept;
+	AxiMemoryController(connections _dla, const char *_name) noexcept;
 
-	uint8_t read(uint32_t addr);
+	void read(uint32_t addr, uint8_t* data, uint32_t data_len);
 	
-	void write(uint32_t addr, uint8_t data);
+	void write(uint32_t addr, uint8_t* data, uint32_t data_len);
+
+	bool is_ready();
 	
 	void eval();
 };
 
 
 
-#endif
+#endif // AXI_MEMORY_CONTROLLER_H

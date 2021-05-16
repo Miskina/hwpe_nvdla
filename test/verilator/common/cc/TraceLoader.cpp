@@ -1,7 +1,7 @@
 #include "include/TraceLoader.h"
 
 
-TraceLoader::TraceLoader(CSBMaster *_csb, AXIResponder *_axi_dbb) noexcept
+TraceLoader::TraceLoader(CSBMaster *_csb, AxiMemoryController *_axi_dbb) noexcept
 {
     csb = _csb;
     axi_dbb = _axi_dbb;
