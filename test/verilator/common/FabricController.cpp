@@ -1,7 +1,6 @@
 #include "FabricController.h"
-#include "Util.h"
 
-#define FABRIC_CONTROLLER_LOG(stream, format, ...) fprintf(stream, "[%s] - " format "\n", name_.c_str(), ##__VA_ARGS__)
+#define FABRIC_CONTROLLER_LOG(stream, format, ...) HWPE_NVDLA_COMPONENT_LOG(stream, name_.c_str(), format, __VA_ARGS__) 
 #define FABRIC_CONTROLLER_INFO(format, ...) FABRIC_CONTROLLER_LOG(stdout, format, __VA_ARGS__)
 #define FABRIC_CONTROLLER_ERR(format, ...) FABRIC_CONTROLLER_LOG(stderr, format, __VA_ARGS__) 
 #define FABRIC_CONTROLLER_ABORT(...)    \
@@ -19,8 +18,6 @@ FabricController::FabricController(std::string&& name) noexcept
 
 FabricController::~FabricController() noexcept
 {
-    util::delete_if(memory_ctrl_);
-    util::delete_if(ctrl_intf_);
 
     if (trace_file_)
     {
@@ -113,7 +110,7 @@ bool FabricController::execute_current_command()
             ControlOperation operation = ControlOperation::Read();
             uint32_t ignored_mask;
             read_from_trace(&operation.addr, &ignored_mask, &operation.data);
-            ctrl_intf_->submit_operation(operation);
+            ctrl_intf_->submit_operation(operation, { });
             current_command = TraceCommand::Invalid;
         }
         break;
@@ -123,7 +120,7 @@ bool FabricController::execute_current_command()
         {
             ControlOperation operation = ControlOperation::Write();
             read_from_trace(&operation.addr, &operation.data);
-            ctrl_intf_->submit_operation(operation);
+            ctrl_intf_->submit_operation(operation, { });
             current_command = TraceCommand::Invalid;
         }
         break;
@@ -241,7 +238,7 @@ void FabricController::process_sync_point(SyncPoint& sync_point)
         if (sync_point.crc != calculated_crc)
         {
             FABRIC_CONTROLLER_ERR("CRC check failed, expected = %08x, calculated = %08x",
-                                    sync_point.crc, calculated_crc);
+                                  sync_point.crc, calculated_crc);
         }
     }
 
@@ -249,7 +246,7 @@ void FabricController::process_sync_point(SyncPoint& sync_point)
     --sync_points_to_process;
 }
 
-void FabricController::check_sync_point() noexcept
+void FabricController::process_sync_points() noexcept
 {
     uint32_t status = ~interrupt_mask & interrupt_status;
     for (auto& [id, sync_point] : sync_points_)
@@ -259,7 +256,6 @@ void FabricController::check_sync_point() noexcept
             process_sync_point(sync_point);
             return;
         }
-
     }
 }
 
@@ -298,7 +294,7 @@ bool FabricController::eval()
 
         if (interrupt_mask_valid && interrupt_status_valid)
         {
-            check_sync_point();
+            process_sync_points();
         }
 
         return true;

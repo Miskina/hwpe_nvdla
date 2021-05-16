@@ -8,11 +8,9 @@ class ControlInterface
 
 public:
 
-    virtual void submit_operation(const ControlOperation& operation, ControlOperationResponse&& response) = 0;
+    virtual void submit_operation(ControlOperation&& operation, ControlOperationResponse&& response) = 0;
 
     virtual bool is_ready() = 0;
-
-private:
 
 };
 

@@ -15,7 +15,7 @@ public:
 };
 
 
-template<typename InterruptableType>
+// template<typename InterruptableType>
 class Interruptable
 {
 
@@ -24,21 +24,14 @@ public:
     void interrupt() noexcept
     {
 
-        if constexpr (has_on_interrupt<InterruptableType>::value)
-        {
-            InterruptableType& this_ = static_cast<InterruptableType&>(*this);
-            this_.on_interrupt();
-        }
+        // if constexpr (has_on_interrupt<InterruptableType>::value)
+        // {
+        //     InterruptableType& this_ = static_cast<InterruptableType&>(*this);
+        //     this_.on_interrupt();
+        // }
         got_interrupt_ = true;
     }
 
-    bool is_interrupted() const noexcept;
-
-
-    void interrupt() noexcept
-    {
-        got_interrupt_ = true;
-    }
 
     bool is_interrupted() const noexcept
     {
@@ -50,7 +43,7 @@ protected:
 
     void clear_interrupt() noexcept
     {
-        got_interrupt_ = false;
+       got_interrupt_ = false;
     }
 
     bool got_interrupt_ = false;

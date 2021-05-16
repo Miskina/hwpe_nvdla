@@ -1,5 +1,5 @@
-#ifndef HWPE_NVDLA_PERIPH_OP_H
-#define HWPE_NVDLA_PERIPH_OP_H
+#ifndef HWPE_NVDLA_CONTROL_OPERATION_H
+#define HWPE_NVDLA_CONTROL_OPERATION_H
 
 #include <cstdint>
 
@@ -10,6 +10,12 @@ struct ControlOperationResponse
 
     constexpr ControlOperationResponse() = default;
     constexpr ControlOperationResponse(bool* valid_, uint32_t* data_) : valid(valid_), data(data_) { }
+
+
+    constexpr operator bool() const noexcept
+    {
+        return valid && data;
+    }
 };
 
 struct ControlOperation
@@ -60,4 +66,4 @@ struct ControlOperation
 
 
 
-#endif // HWPE_NVDLA_PERIPH_OP_H
+#endif // HWPE_NVDLA_CONTROL_OPERATION_H

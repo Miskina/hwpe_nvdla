@@ -73,7 +73,9 @@ void AxiMemoryController::eval()
         *dla.aw_awready = 0;
     }
     else
+    {
         *dla.aw_awready = 1;
+    }
     
     /* write data */
     if (*dla.w_wvalid)
@@ -136,7 +138,9 @@ void AxiMemoryController::eval()
         *dla.ar_arready = 0;
     }
     else
+    {
         *dla.ar_arready = 1;
+    }
     
     /* now handle the write FIFOs ... */
     if (!aw_fifo.empty() && !w_fifo.empty())
@@ -226,7 +230,8 @@ void AxiMemoryController::eval()
     
     /* write response */
     *dla.b_bvalid = 0;
-    if (*dla.b_bready && !b_fifo.empty()) {
+    if (*dla.b_bready && !b_fifo.empty())
+    {
         *dla.b_bvalid = 1;
         
         axi_b_txn &txn = b_fifo.front();

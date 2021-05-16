@@ -16,9 +16,6 @@
 #endif
 
 #define NVDLA_PRIMARY_MEMIF_WIDTH 64
-
-class AxiMemoryController : public MemoryController {
-public:
 #if NVDLA_PRIMARY_MEMIF_WIDTH == 64
 #	define AXI_WDATA_TYPE uint64_t
 #	define AXI_WDATA_TYLEN 64
@@ -40,6 +37,12 @@ public:
 #else
 #	error unsupported NVDLA_MEM_ADDRESS_WIDTH
 #endif
+
+
+class AxiMemoryController : public MemoryController
+{
+
+public:
 
 #define AXI_WIDTH NVDLA_PRIMARY_MEMIF_WIDTH
 
@@ -78,8 +81,8 @@ private:
 
 #define AXI_BLOCK_SIZE 4096
 
-	const static int AXI_R_LATENCY = 32;
-	const static int AXI_R_DELAY = 0;
+	static constexpr int AXI_R_LATENCY = 32;
+	static constexpr int AXI_R_DELAY = 0;
 
 	struct axi_r_txn
     {
@@ -124,11 +127,11 @@ private:
 public:	
 	AxiMemoryController(connections _dla, const char *_name) noexcept;
 
-	void read(uint32_t addr, uint8_t* data, uint32_t data_len);
+	virtual void read(uint32_t addr, uint8_t* data, uint32_t data_len) override;
 	
-	void write(uint32_t addr, uint8_t* data, uint32_t data_len);
+	virtual void write(uint32_t addr, uint8_t* data, uint32_t data_len) override;
 
-	bool is_ready();
+	virtual bool is_ready() override;
 	
 	void eval();
 };

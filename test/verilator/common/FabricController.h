@@ -8,6 +8,7 @@
 #include "MemoryController.h"
 #include "ControlInterface.h"
 #include "Interruptable.h"
+#include "Util.h"
 
 #define TRACE_SYNCPT_MASK 0x80000000
 
@@ -27,7 +28,7 @@ enum class TraceCommand : uint8_t
 };
 
 
-class FabricController : public Interruptable<FabricController>
+class FabricController : public Interruptable
 {
 
 public:
@@ -93,7 +94,7 @@ private:
     int sync_points_to_process = 0;
 
     bool sync_points_finished() const noexcept;
-    void check_sync_point() noexcept;
+    void process_sync_points() noexcept;
     void process_sync_point(SyncPoint& sync_point) noexcept;
 
     uint32_t interrupt_status_addr;

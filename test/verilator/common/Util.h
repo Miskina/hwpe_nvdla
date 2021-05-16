@@ -4,6 +4,7 @@
 
 #define HWPE_NVDLA_MACRO_START do {
 #define HWPE_NVDLA_MACRO_END } while(0)
+#define HWPE_NVDLA_COMPONENT_LOG(stream, name, format, ...) fprintf(stream, "[%s] - " format "\n", name, ##__VA_ARGS__)
 
 namespace util
 {
