@@ -1,5 +1,6 @@
 #include <utility>
 #include <cstdio>
+#include <type_traits>
 
 #define HWPE_NVDLA_MACRO_START do {
 #define HWPE_NVDLA_MACRO_END } while(0)
@@ -8,7 +9,7 @@ namespace util
 {
 
 	template<typename T>
-	inline void delete_if(T* obj)
+	inline void delete_if(T* obj) noexcept
 	{
 		if(obj)
 		{

@@ -90,9 +90,11 @@ private:
 
 
     std::map<uint32_t, SyncPoint> sync_points_;
+    int sync_points_to_process = 0;
 
-    bool sync_points_finished();
-    bool check_sync_point();
+    bool sync_points_finished() const noexcept;
+    void check_sync_point() noexcept;
+    void process_sync_point(SyncPoint& sync_point) noexcept;
 
     uint32_t interrupt_status_addr;
     bool     interrupt_status_valid;

@@ -98,6 +98,14 @@ bool FabricController::execute_current_command()
 
     switch(current_command)
     {
+    case TraceCommand::WFI:
+        if (is_interrupted())
+        {
+            current_command = TraceCommand::Invalid;
+            clear_interrupt();
+        }
+        break;
+
     case TraceCommand::ReadRegister:
 
         if (ctrl_intf_->is_ready())
@@ -157,6 +165,7 @@ bool FabricController::execute_current_command()
 
         read_from_trace(&id, &mask);
         sync_points_.emplace(TRACE_SYNCPT_MASK | id, mask);
+        ++sync_points_to_process;
         current_command = TraceCommand::Invalid;
         break;
 
@@ -191,26 +200,72 @@ bool FabricController::execute_current_command()
     return true;
 }
 
-bool FabricController::check_sync_point()
+
+uint32_t calculate_crc(uint32_t base_addr, uint32_t size, MemoryController* mem_ctrl) noexcept
 {
-    uint32_t status = ~interrupt_mask & interrupt_status;
-    for (auto &[id, sync_point] : sync_points_)
+    uint32_t crc = ~0;
+    uint32_t addr = base_addr;
+    uint32_t len = size;
+    
+    if (((addr & 0x80000000) != 0x80000000) || !mem_ctrl)
     {
-        if ((status & sync_point.mask) != sync_point.mask)
-            continue;
+        fprintf(stderr, "NV SMALL does not support writing to non DBB memory");
+        abort();
+    }
 
-        ctrl_intf_->submit_operation(ControlOperation::Write(interrupt_status_addr, sync_point.mask), {});
-        sync_point.processed = true;
-
-        if (!sync_point.is_noop())
+    while (len)
+    {
+        uint8_t da;
+        mem_ctrl->read(addr, &da, sizeof(da));
+        
+        crc ^= da;
+        for (int i = 0; i < 8; i++)
         {
-            uint32_t calculated_crc = crc(sync_point.base, sync_point.size);
-            if (sync_point.crc != calculated_crc)
-            {
-                return false;
-            }
+            crc = (crc >> 1) ^ ((crc & 1) ? 0xEDB88320 : 0);
+        }
+        
+        addr++;
+        len--;
+    }
+    
+    return ~crc;
+}
+
+void FabricController::process_sync_point(SyncPoint& sync_point)
+{
+    ctrl_intf_->submit_operation(ControlOperation::Write(interrupt_status_addr, sync_point.mask), {});
+
+    if (!sync_point.is_noop())
+    {
+        uint32_t calculated_crc = calculate_crc(sync_point.base, sync_point.size, memory_ctrl_);
+        if (sync_point.crc != calculated_crc)
+        {
+            FABRIC_CONTROLLER_ERR("CRC check failed, expected = %08x, calculated = %08x",
+                                    sync_point.crc, calculated_crc);
         }
     }
+
+    sync_point.processed = true;
+    --sync_points_to_process;
+}
+
+void FabricController::check_sync_point() noexcept
+{
+    uint32_t status = ~interrupt_mask & interrupt_status;
+    for (auto& [id, sync_point] : sync_points_)
+    {
+        if (!sync_point.processed && (status & sync_point.mask) == sync_point.mask)
+        {
+            process_sync_point(sync_point);
+            return;
+        }
+
+    }
+}
+
+bool FabricController::sync_points_finished() const noexcept
+{
+    return sync_points_to_process > 0;
 }
 
 bool FabricController::eval()
@@ -243,10 +298,7 @@ bool FabricController::eval()
 
         if (interrupt_mask_valid && interrupt_status_valid)
         {
-            if (!check_sync_point())
-            {
-                FABRIC_CONTROLLER_ERR("CRC check failed, expected = %08x, calculated = %08x", sync_point.crc, calculated_crc);
-            }
+            check_sync_point();
         }
 
         return true;

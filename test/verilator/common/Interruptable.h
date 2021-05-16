@@ -34,9 +34,24 @@ public:
 
     bool is_interrupted() const noexcept;
 
+
+    void interrupt() noexcept
+    {
+        got_interrupt_ = true;
+    }
+
+    bool is_interrupted() const noexcept
+    {
+        return got_interrupt_;
+    }
+
+
 protected:
 
-    void clear_interrupt() noexcept;
+    void clear_interrupt() noexcept
+    {
+        got_interrupt_ = false;
+    }
 
     bool got_interrupt_ = false;
 
