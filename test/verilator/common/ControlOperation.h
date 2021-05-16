@@ -37,11 +37,13 @@ struct ControlOperation
         return is_noop();
     }
 
+    // TODO? Moze li se poslati adresa pa da se to odmah postavi?
     static constexpr ControlOperation Read() noexcept
     {
         return {true, 0, 0, 0xFF, 0};
     }
 
+    // TODO? Moze li se odmah poslati adresa i podaci?
     static constexpr ControlOperation Write() noexcept
     {
         return {false, 0, 0, 0xFF, 0};

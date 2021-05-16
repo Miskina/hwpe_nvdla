@@ -195,6 +195,77 @@ bool FabricController::eval()
         }
 
         trace_file_processing_finished_ = execute_current_command();
+
+        if (trace_file_processing_finished_ && !sync_points_.empty())
+        {
+            /* TODO:
+              1. read interrupt_mask
+              2. read interrupt_status
+              3. kako provjeriti procitane podatke a da nismo usko vezani uz ControllInterface?
+                 - mogli bi imati u operation strukturi pointer za r_data, gdje upisati r_data
+                   (ili samo normalno mjesto za spremit, ne pointer) i flag kad je data zapravo procitan
+                   i onda tu nakon postavljanja zahtjeva samo provjeravati kad je procitan data.
+                   Jedino je pitanje kako poslati op a da se ne unisti pri opqueue pop i da mi dobijemo
+                   r_data nazad...
+                   Mozda s pointerima onda nije losa ideja jer ce se to spremit u pointere, a mi
+                   ne moramo brinut o op
+            */
+            static bool interrupt_mask_read_request_posted = false, interrupt_status_read_request_posted = false;
+            static bool interrupt_mask_read = false, interrupt_status_read = false;
+            static uint32_t interrupt_mask, interrupt_status;
+
+            if (!interrupt_mask_read_request_posted && ctrl_intf_->is_ready())
+            {
+                ControlOperation op = ControlOperation::Read();
+                op.addr = interrupt_mask_addr;
+                op.r_data = &interrupt_mask;
+                op.finished = &interrupt_mask_read;
+                ctrl_intf_->submit_operation(op);
+            }
+
+            if (!interrupt_status_read_request_posted && ctrl_intf_->is_ready())
+            {
+                ControlOperation op = ControlOperation::Read();
+                op.addr = interrupt_status_addr;
+                op.r_data = &interrupt_status;
+                op.finished = &interrupt_status_read;
+                ctrl_intf_->submit_operation(op);
+            }
+
+            if (interrupt_mask_read && interrupt_status_read)
+            {
+                // Interrupt polling
+                uint32_t status = ~interrupt_mask & interrupt_status;
+                for (auto& [id, mask] : sync_points_)
+                {
+                    if ((status & mask) != mask)
+                        continue;
+                    
+                    ControlOperation op = ControlOperation::Write();
+                    op.addr = interrupt_status_addr;
+                    op.data = mask;
+                    ctrl_intf_->submit_operation(op);
+
+                    uint32_t sync_point_id = id & ~TRACE_SYNCPT_MASK;
+                    
+                    // Check if it->first needs to do a crc check
+                    if (is_crc(sync_point_id))
+                    {
+                        crc(sync_point_id);
+                    }
+                }
+                interrupt_mask_read_request_posted = false;
+                interrupt_status_read_request_posted = false;
+                interrupt_mask_read = false;
+                interrupt_status_read = false;
+            }
+        }
+
+        if (trace_file_processing_finished_ && sync_points_.empty())
+        {
+            // TODO: Done
+        }
+
         return true;
     }
 
