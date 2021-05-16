@@ -191,6 +191,28 @@ bool FabricController::execute_current_command()
     return true;
 }
 
+bool FabricController::check_sync_point()
+{
+    uint32_t status = ~interrupt_mask & interrupt_status;
+    for (auto &[id, sync_point] : sync_points_)
+    {
+        if ((status & sync_point.mask) != sync_point.mask)
+            continue;
+
+        ctrl_intf_->submit_operation(ControlOperation::Write(interrupt_status_addr, sync_point.mask), {});
+        sync_point.processed = true;
+
+        if (!sync_point.is_noop())
+        {
+            uint32_t calculated_crc = crc(sync_point.base, sync_point.size);
+            if (sync_point.crc != calculated_crc)
+            {
+                return false;
+            }
+        }
+    }
+}
+
 bool FabricController::eval()
 {
     if (!trace_file_processing_finished_)
@@ -201,8 +223,34 @@ bool FabricController::eval()
         }
 
         trace_file_processing_finished_ = execute_current_command();
+
         return true;
     }
 
-    // TODO: Sync point processing
+    if (trace_file_processing_finished_ && !sync_points_finished())
+    {
+        if (ctrl_intf_->is_ready())
+        {
+            ctrl_intf_->submit_operation(ControlOperation::Read(interrupt_mask_addr),
+                    {&interrupt_mask_valid, &interrupt_mask});
+        }
+
+        if (ctrl_intf_->is_ready())
+        {
+            ctrl_intf_->submit_operation(ControlOperation::Read(interrupt_status_addr),
+                    {&interrupt_status_valid, &interrupt_status});
+        }
+
+        if (interrupt_mask_valid && interrupt_status_valid)
+        {
+            if (!check_sync_point())
+            {
+                FABRIC_CONTROLLER_ERR("CRC check failed, expected = %08x, calculated = %08x", sync_point.crc, calculated_crc);
+            }
+        }
+
+        return true;
+    }
+
+    return false;
 }

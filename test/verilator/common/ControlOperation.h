@@ -3,6 +3,15 @@
 
 #include <cstdint>
 
+struct ControlOperationResponse
+{
+    bool* valid = nullptr;
+    uint32_t *data = nullptr;
+
+    constexpr ControlOperationResponse() = default;
+    constexpr ControlOperationResponse(bool* valid_, uint32_t* data_) : valid(valid_), data(data_) { }
+};
+
 struct ControlOperation
 {
     bool wen = false;
@@ -37,14 +46,14 @@ struct ControlOperation
         return is_noop();
     }
 
-    static constexpr ControlOperation Read() noexcept
+    static constexpr ControlOperation Read(uint32_t addr = 0) noexcept
     {
-        return {true, 0, 0, 0xFF, 0};
+        return {true, addr, 0, 0xFF, 0};
     }
 
-    static constexpr ControlOperation Write() noexcept
+    static constexpr ControlOperation Write(uint32_t addr = 0, uint32_t data = 0) noexcept
     {
-        return {false, 0, 0, 0xFF, 0};
+        return {false, addr, data, 0xFF, 0};
     }
 
 };

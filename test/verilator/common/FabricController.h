@@ -3,7 +3,7 @@
 
 #include <string>
 #include <cstdio>
-#include <unordered_map>
+#include <map>
 
 #include "MemoryController.h"
 #include "ControlInterface.h"
@@ -70,7 +70,6 @@ private:
 
     TraceCommand current_command = TraceCommand::Invalid;
 
-
     struct SyncPoint 
     {
         constexpr SyncPoint() = default;
@@ -90,10 +89,17 @@ private:
     };
 
 
-    std::unordered_map<uint32_t, SyncPoint> sync_points_;
+    std::map<uint32_t, SyncPoint> sync_points_;
+
+    bool sync_points_finished();
+    bool check_sync_point();
 
     uint32_t interrupt_status_addr;
+    bool     interrupt_status_valid;
+    uint32_t interrupt_status;
     uint32_t interrupt_mask_addr;
+    bool     interrupt_mask_valid;
+    uint32_t interrupt_mask;
 };
 
 
