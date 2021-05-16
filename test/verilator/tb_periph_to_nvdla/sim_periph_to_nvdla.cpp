@@ -1,16 +1,14 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <fcntl.h>
-
-#include <queue>
 
 #include <verilated.h>
 
-#include "AXIResponder.h"
-#include "TraceLoader.h"
-#include "PeriphMaster.h"
-#include "Vperiph_to_nvdla.h"
+#include "FabricController.h"
+#include "AxiMemoryController.h"
+#include "PeriphControl.h"
+
+
 
 #if VM_TRACE
 #include <verilated_vcd_c.h>
@@ -26,10 +24,10 @@ void _close_trace()
 
 int main(int argc, const char **argv, char **env) {
 
-	Vperiph_to_nvdla *dla = new Vperiph_to_nvdla{"TOP"};
-    PeriphMaster* periph = new PeriphMaster{"PeriphMaster"};
+	Vtb_periph_to_nvdla *dla = new Vtb_periph_to_nvdla{"NVDLA"};
 	
-	AxiMemoryController::connections dbbconn = {
+	AxiMemoryController::connections dbbconn
+	{
 		.aw_awvalid = &dla->dbb_aw_awvalid,
 		.aw_awready = &dla->dbb_aw_awready,
 		.aw_awid    = &dla->dbb_aw_awid,
@@ -58,9 +56,31 @@ int main(int argc, const char **argv, char **env) {
 		.r_rlast  = &dla->dbb_r_rlast,
 		.r_rdata  = &dla->dbb_r_rdata,
 	};
-	AxiMemoryController* axi_dbb = new AxiMemoryController(dbbconn, "DBB");
 
-	TraceLoader* trace = new TraceLoader(csb, axi_dbb, axi_cvsram);
+	PeriphConnections periph_connections
+	{
+		.req  = &dla->periph_req_i,
+		.add  = &dla->periph_add_i,
+		.wen  = &dla->periph_wen_i,
+		.be   = &dla->periph_be_i,
+		.data = &dla->periph_data_i,
+
+		.gnt  	 = &dla->periph_gnt_o,
+		.r_data  = &dla->periph_r_data_o,
+		.r_valid = &dla->periph_r_valid_o,
+		.r_id	 = &dla->periph_r_id_o,
+	};
+
+
+	AxiMemoryController* axi_dbb = new AxiMemoryController(dbbconn, "DBB");
+	PeriphControl* periph = new PeriphControl(periph_connections, "PeriphCTRL");
+
+	FabricController* fabric_ctrl = new FabricController("FabricCTRL");
+	fabric_ctrl->attach(periph);
+	fabric_ctrl->attach(axi_dbb);
+
+	util::Release _{dla, axi_dbb, periph, fabric_ctrl};
+
 
 #if VM_TRACE
 	Verilated::traceEverOn(true);
@@ -77,7 +97,7 @@ int main(int argc, const char **argv, char **env) {
 		return 1;
 	}
 	
-	trace->load(argv[1]);
+	fabric_ctrl->load_trace(argv[1]);
 
 	printf("reset...\n");
 	dla->rst = 0;
@@ -142,29 +162,14 @@ int main(int argc, const char **argv, char **env) {
 
 	printf("running trace...\n");
 	uint32_t quiesc_timer = 200;
-	int waiting = 0;
-	while (!csb->done() || (quiesc_timer--)) {
-		int extevent;
-		
-		extevent = csb->eval(waiting);
-		
-		if (extevent == TraceLoader::TRACE_AXIEVENT)
-			trace->axievent();
-		else if (extevent == TraceLoader::TRACE_WFI) {
-			waiting = 1;
-			printf("(%lu) waiting for interrupt...\n", Verilated::time());
-		} else if (extevent & TraceLoader::TRACE_SYNCPT_MASK) {
-			trace->syncpt(extevent);
-		}
-		
-		if (waiting && dla->dla_intr) {
-			printf("(%lu) interrupt!\n", Verilated::time());
-			waiting = 0;
-		}
+	while (fabric_ctrl->eval() && quiesc_timer)
+	{
+
+		fabric_ctrl->eval();
+
+		periph_ctrl->eval();
 		
 		axi_dbb->eval();
-		if (axi_cvsram)
-			axi_cvsram->eval();
 
 		dla->clk = 1;
 		
@@ -185,6 +190,7 @@ int main(int argc, const char **argv, char **env) {
 	
 	printf("done at %lu Verilated::time()\n", Verilated::time());
 
+	// TODO: Handle the test passed in fabric contrller??
 	if (!trace->test_passed()) {
 		printf("*** FAIL: test failed due to output mismatch\n");
 		return 1;
@@ -196,11 +202,6 @@ int main(int argc, const char **argv, char **env) {
 	}
 	
 	printf("*** PASS\n");
-	
-    delete periph;
-	delete trace;
-	delete dla;
-	delete axi_dbb;
 
 	return 0;
 }
