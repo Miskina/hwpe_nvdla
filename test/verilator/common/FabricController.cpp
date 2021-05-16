@@ -152,7 +152,7 @@ bool FabricController::execute_current_command()
 
     case TraceCommand::RegisterSyncpoint:
 
-        sync_point_id_t id;
+        uint32_t id;
         uint32_t mask;
 
         read_from_trace(&id, &mask);
@@ -168,11 +168,17 @@ bool FabricController::execute_current_command()
     case TraceCommand::SyncpointCheckCRC:
 
         uint32_t sp_id;
-        uint32_t base;
-        uint32_t size;
-        uint32_t crc; 
+        read_from_trace(&sp_id);
 
-        read_from_trace(&sp_id, &base, &size, &crc);
+        SyncPoint& point = sync_points_[sp_id];
+        read_from_trace(&point.base, &point.size, &point.crc);
+
+        current_command = TraceCommand::Invalid;
+        break;
+    
+    case TraceCommand::SyncpointCheckNothing:
+        uint32_t sp_id;
+        read_from_trace(&sp_id);
 
         current_command = TraceCommand::Invalid;
         break;

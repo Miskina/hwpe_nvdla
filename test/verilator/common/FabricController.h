@@ -70,8 +70,27 @@ private:
 
     TraceCommand current_command = TraceCommand::Invalid;
 
-    using sync_point_id_t = uint32_t;
-    std::unordered_map<sync_point_id_t, uint32_t> sync_points_;
+
+    struct SyncPoint 
+    {
+        constexpr SyncPoint() = default;
+
+        constexpr SyncPoint(uint32_t mask_) : mask(mask_) {}
+
+        uint32_t mask = 0;
+        uint32_t crc = 0;
+        uint32_t base = 0;
+        uint32_t size = 0;
+        bool processed = false;
+
+        bool is_noop() const noexcept
+        {
+            return !(crc || base || size);
+        }
+    };
+
+
+    std::unordered_map<uint32_t, SyncPoint> sync_points_;
 
     uint32_t interrupt_status_addr;
     uint32_t interrupt_mask_addr;
