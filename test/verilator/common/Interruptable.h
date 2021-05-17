@@ -11,7 +11,7 @@ private:
     template<typename U> static int test(...);
 
 public:
-    static inline constexpr value = test<T>(0) == sizeof(char);
+    static inline constexpr bool value = test<T>(0) == sizeof(char);
 };
 
 

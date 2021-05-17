@@ -45,6 +45,7 @@ public:
 
     bool eval();
 
+    bool test_passed() const noexcept;
 
 private:
 
@@ -55,8 +56,8 @@ private:
     template<typename T, typename ... Ts>
     inline void read_from_trace(T* data, Ts*... datas)
     {
-        read_from_trace(static_cast<uint8_t*>(data), sizeof(T));
-        (read_from_trace(static_cast<uint8_t*>(datas), sizeof(Ts)), ...);
+        read_from_trace(reinterpret_cast<uint8_t*>(data), sizeof(T));
+        (read_from_trace(reinterpret_cast<uint8_t*>(datas), sizeof(Ts)), ...);
     }
 
     bool execute_current_command();
@@ -89,8 +90,7 @@ private:
         }
     };
 
-
-    std::map<uint32_t, SyncPoint> sync_points_;
+    std::map<uint32_t, SyncPoint> sync_points_{};
     int sync_points_to_process = 0;
 
     bool sync_points_finished() const noexcept;
@@ -103,6 +103,8 @@ private:
     uint32_t interrupt_mask_addr;
     bool     interrupt_mask_valid;
     uint32_t interrupt_mask;
+
+    bool test_passed_ = true;
 };
 
 

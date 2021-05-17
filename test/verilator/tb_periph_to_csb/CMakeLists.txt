@@ -9,7 +9,7 @@ target_include_directories(sim PRIVATE ${HWPE_NVDLA_VERILATOR_COMMON_DIR_BASE} $
  
 verilate(sim TRACE
     INCLUDE_DIRS ${HWPE_NVDLA_SOURCE_DIR} ${HWPE_NVDLA_TEST_SOURCES_DIR} ${HWPE_NVDLA_INTF_DIR}
-    VERILATOR_ARGS -Os -x-assign 0 -Wno-UNOPTFLAT -Wno-UNUSED --compiler gcc --output-split 250000000 -CFLAGS -fPIE -DPIE
+    VERILATOR_ARGS -Os -x-assign 0 -Wno-UNOPTFLAT -Wno-UNUSED --compiler gcc --output-split 250000000 -CFLAGS "-fPIE -DPIE"
     SOURCES ${HWPE_NVDLA_TEST_SOURCES_DIR}/tb_periph_to_csb.sv
             ${HWPE_NVDLA_TEST_SOURCES_DIR}/csb_slave_with_intf.sv
             ${HWPE_NVDLA_ALL_SOURCES}

@@ -1,3 +1,6 @@
+#ifndef HWPE_NVDLA_UTIL_H
+#define HWPE_NVDLA_UTIL_H
+
 #include <utility>
 #include <cstdio>
 #include <type_traits>
@@ -109,3 +112,6 @@ namespace util
 	template<typename ... VerilatedTypes>
 	VerilatedModel(VerilatedTypes*... models) -> VerilatedModel<VerilatedTypes...>;
 }
+
+
+#endif // HWPE_NVDLA_UTIL_H

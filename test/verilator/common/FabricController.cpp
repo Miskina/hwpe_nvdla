@@ -1,8 +1,8 @@
 #include "FabricController.h"
 
-#define FABRIC_CONTROLLER_LOG(stream, format, ...) HWPE_NVDLA_COMPONENT_LOG(stream, name_.c_str(), format, __VA_ARGS__) 
-#define FABRIC_CONTROLLER_INFO(format, ...) FABRIC_CONTROLLER_LOG(stdout, format, __VA_ARGS__)
-#define FABRIC_CONTROLLER_ERR(format, ...) FABRIC_CONTROLLER_LOG(stderr, format, __VA_ARGS__) 
+#define FABRIC_CONTROLLER_LOG(stream, format, ...) HWPE_NVDLA_COMPONENT_LOG(stream, name_.c_str(), format, ##__VA_ARGS__) 
+#define FABRIC_CONTROLLER_INFO(format, ...) FABRIC_CONTROLLER_LOG(stdout, format, ##__VA_ARGS__)
+#define FABRIC_CONTROLLER_ERR(format, ...) FABRIC_CONTROLLER_LOG(stderr, format, ##__VA_ARGS__) 
 #define FABRIC_CONTROLLER_ABORT(...)    \
     HWPE_NVDLA_MACRO_START              \
     FABRIC_CONTROLLER_ERR("Aborting!"); \
@@ -95,103 +95,120 @@ bool FabricController::execute_current_command()
 
     switch(current_command)
     {
-    case TraceCommand::WFI:
-        if (is_interrupted())
+        case TraceCommand::WFI:
         {
-            current_command = TraceCommand::Invalid;
-            clear_interrupt();
+            if (is_interrupted())
+            {
+                current_command = TraceCommand::Invalid;
+                clear_interrupt();
+            }
+            break;
         }
-        break;
-
-    case TraceCommand::ReadRegister:
-
-        if (ctrl_intf_->is_ready())
+        case TraceCommand::ReadRegister:
         {
-            ControlOperation operation = ControlOperation::Read();
-            uint32_t ignored_mask;
-            read_from_trace(&operation.addr, &ignored_mask, &operation.data);
-            ctrl_intf_->submit_operation(operation, { });
-            current_command = TraceCommand::Invalid;
+            if (ctrl_intf_->is_ready())
+            {
+                ControlOperation operation = ControlOperation::Read();
+                uint32_t ignored_mask;
+                read_from_trace(&operation.addr, &ignored_mask, &operation.data);
+                ctrl_intf_->submit_operation(operation, { });
+                current_command = TraceCommand::Invalid;
+            }
+            break;
         }
-        break;
-
-    case TraceCommand::WriteRegister:
-        if (ctrl_intf_->is_ready())
+        case TraceCommand::WriteRegister:
         {
-            ControlOperation operation = ControlOperation::Write();
-            read_from_trace(&operation.addr, &operation.data);
-            ctrl_intf_->submit_operation(operation, { });
-            current_command = TraceCommand::Invalid;
+            if (ctrl_intf_->is_ready())
+            {
+                ControlOperation operation = ControlOperation::Write();
+                read_from_trace(&operation.addr, &operation.data);
+                ctrl_intf_->submit_operation(operation, { });
+                current_command = TraceCommand::Invalid;
+            }
+            break;
         }
-        break;
-    case TraceCommand::DumpMemory:
-        FABRIC_CONTROLLER_ERR("Dump memory not implemented!");
-        FABRIC_CONTROLLER_ERR("Ignoring...");
-
-        uint32_t addr;
-        uint32_t len;
-
-        read_from_trace(&addr, &len);
-        fseek(trace_file_, len, SEEK_CUR);
-
-        read_from_trace(&len);
-        fseek(trace_file_, len, SEEK_CUR);
-
-        current_command = TraceCommand::Invalid;
-        break;
-    case TraceCommand::LoadIntoMemory:
-        if (memory_ctrl_->is_ready())
+        case TraceCommand::DumpMemory:
         {
+            FABRIC_CONTROLLER_ERR("Dump memory not implemented!");
+            FABRIC_CONTROLLER_ERR("Ignoring...");
+
             uint32_t addr;
             uint32_t len;
-            uint8_t* buffer;
 
             read_from_trace(&addr, &len);
-            buffer = new uint8_t[len];
-            
-            memory_ctrl_->write(addr, buffer, len);
+            fseek(trace_file_, len, SEEK_CUR);
+
+            read_from_trace(&len);
+            fseek(trace_file_, len, SEEK_CUR);
 
             current_command = TraceCommand::Invalid;
+            break;
         }
-        break;
+        case TraceCommand::LoadIntoMemory:
+        {
+            if (memory_ctrl_->is_ready())
+            {
+                uint32_t addr;
+                uint32_t len;
+                uint8_t* buffer;
 
-    case TraceCommand::RegisterSyncpoint:
+                read_from_trace(&addr, &len);
+                buffer = new uint8_t[len];
+                
+                memory_ctrl_->write(addr, buffer, len);
 
-        uint32_t id;
-        uint32_t mask;
+                current_command = TraceCommand::Invalid;
+            }
+            break;
+        }
+        case TraceCommand::RegisterSyncpoint:
+        {
+            uint32_t id;
+            uint32_t mask;
 
-        read_from_trace(&id, &mask);
-        sync_points_.emplace(TRACE_SYNCPT_MASK | id, mask);
-        ++sync_points_to_process;
-        current_command = TraceCommand::Invalid;
-        break;
+            read_from_trace(&id, &mask);
+            sync_points_.emplace(TRACE_SYNCPT_MASK | id, mask);
+            ++sync_points_to_process;
+            current_command = TraceCommand::Invalid;
+            break;
+        }
+        case TraceCommand::SetInterruptRegisters:
+        {
+            read_from_trace(&interrupt_status_addr, &interrupt_mask_addr);
+            current_command = TraceCommand::Invalid;
+            break;
+        }
+        case TraceCommand::SyncpointCheckCRC:
+        {
+            uint32_t sp_id;
+            read_from_trace(&sp_id);
 
-    case TraceCommand::SetInterruptRegisters:
-        read_from_trace(&interrupt_status_addr, &interrupt_mask_addr);
-        current_command = TraceCommand::Invalid;
-        break;
+            SyncPoint& point = sync_points_[sp_id];
+            read_from_trace(&point.base, &point.size, &point.crc);
 
-    case TraceCommand::SyncpointCheckCRC:
+            current_command = TraceCommand::Invalid;
+            break;
+        } 
+        case TraceCommand::SyncpointCheckNothing:
+        {
+            uint32_t sp_id;
+            read_from_trace(&sp_id);
 
-        uint32_t sp_id;
-        read_from_trace(&sp_id);
-
-        SyncPoint& point = sync_points_[sp_id];
-        read_from_trace(&point.base, &point.size, &point.crc);
-
-        current_command = TraceCommand::Invalid;
-        break;
-    
-    case TraceCommand::SyncpointCheckNothing:
-        uint32_t sp_id;
-        read_from_trace(&sp_id);
-
-        current_command = TraceCommand::Invalid;
-        break;
-
-    case TraceCommand::Close:
-        FABRIC_CONTROLLER_INFO("Finished trace simulation!");
-        break;
+            current_command = TraceCommand::Invalid;
+            break;
+        }
+        case TraceCommand::Close:
+        {
+            FABRIC_CONTROLLER_INFO("Trace file processed!");
+            fclose(trace_file_);
+            trace_file_ = nullptr;
+            break;
+        }
+        default:
+        {
+            FABRIC_CONTROLLER_ERR("Invalid trace command read from file!");
+            FABRIC_CONTROLLER_ABORT();
+        }
     }
 
     return true;
@@ -228,7 +245,7 @@ uint32_t calculate_crc(uint32_t base_addr, uint32_t size, MemoryController* mem_
     return ~crc;
 }
 
-void FabricController::process_sync_point(SyncPoint& sync_point)
+void FabricController::process_sync_point(SyncPoint& sync_point) noexcept
 {
     ctrl_intf_->submit_operation(ControlOperation::Write(interrupt_status_addr, sync_point.mask), {});
 
@@ -237,6 +254,7 @@ void FabricController::process_sync_point(SyncPoint& sync_point)
         uint32_t calculated_crc = calculate_crc(sync_point.base, sync_point.size, memory_ctrl_);
         if (sync_point.crc != calculated_crc)
         {
+            test_passed_ = false;
             FABRIC_CONTROLLER_ERR("CRC check failed, expected = %08x, calculated = %08x",
                                   sync_point.crc, calculated_crc);
         }
@@ -301,4 +319,9 @@ bool FabricController::eval()
     }
 
     return false;
+}
+
+bool FabricController::test_passed() const noexcept
+{
+    return test_passed_;
 }

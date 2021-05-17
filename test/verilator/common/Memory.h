@@ -52,7 +52,6 @@ public:
         return value;
     }
 
-
     template<typename AddressType, typename DataType>
     void write(AddressType address, DataType data) noexcept
     {
@@ -76,25 +75,29 @@ public:
         }
         
         // Avoid bug with type inference automating to int for integer literals.
-        // Otherwise the mask is 0 for misalignment larger than 3 (which can happen with 64-bit integers) 
+        // Otherwise the mask is 0 for misalignment larger than 3 (which can happen with 64-bit integers). 
         constexpr DataType one = 1;
 
-        DataType value = data << misalignment * 8;
-        DataType mask = (one << (misalignment * 8)) - one;
+        const DataType value = data << misalignment * 8;
+        const DataType mask = (one << (misalignment * 8)) - one;
         *mem_block_data &= mask;
         *mem_block_data |= value;            
 
         const int to_aligned = alignof(DataType) - misalignment;
         const AddressType next_addr = address + to_aligned; 
-        DataType next_data = (read<DataType>(next_addr) & ~mask) | (data >> (to_aligned * 8));
+        const DataType next_data = (read<DataType>(next_addr) & ~mask) | (data >> (to_aligned * 8));
 
         write(next_addr, next_data);
     }
 
 
+    const std::string& name() const noexcept
+    {
+        return name_;
+    }
+
 private:
 
-    size_t page_size_;
     std::unordered_map<uint32_t, std::vector<uint8_t>> ram_;
     std::string name_;
 

@@ -12,7 +12,7 @@
 #include "MemoryController.h"
 
 #ifndef NVDLA_MEM_ADDRESS_WIDTH
-    #define NVDLA_MEM_ADDRESS_WIDTH 64
+    #define NVDLA_MEM_ADDRESS_WIDTH 32
 #endif
 
 #define NVDLA_PRIMARY_MEMIF_WIDTH 64
@@ -46,7 +46,7 @@ public:
 
 #define AXI_WIDTH NVDLA_PRIMARY_MEMIF_WIDTH
 
-	struct connections
+	struct Connections
 	{
 		uint8_t* aw_awvalid;
 		uint8_t* aw_awready;
@@ -121,11 +121,11 @@ private:
 	
 	Memory<>* ram;
 	
-	connections dla;
+	Connections dla;
 	const char *name;
 	
 public:	
-	AxiMemoryController(connections _dla, const char *_name) noexcept;
+	AxiMemoryController(Connections&& _dla, const char *_name) noexcept;
 
 	virtual void read(uint32_t addr, uint8_t* data, uint32_t data_len) override;
 	

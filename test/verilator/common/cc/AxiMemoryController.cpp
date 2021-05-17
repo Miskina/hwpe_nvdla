@@ -2,9 +2,9 @@
 #include <verilated.h>
 
 
-AxiMemoryController::AxiMemoryController(AxiMemoryController::connections _dla, const char *_name) noexcept
+AxiMemoryController::AxiMemoryController(AxiMemoryController::Connections&& _dla, const char *_name) noexcept
+    : dla(std::forward<decltype(_dla)>(_dla))
 {
-    dla = _dla;
     
     *dla.aw_awready = 1;
     *dla.w_wready = 1;
@@ -36,7 +36,7 @@ void AxiMemoryController::read(uint32_t addr, uint8_t* data, uint32_t data_len)
 {
     for (int i = 0; i < data_len; ++i)
     {
-        data[i] = ram.read(addr + i);
+        data[i] = ram->read<uint8_t>(addr + i);
     }
 }
 
@@ -45,7 +45,7 @@ void AxiMemoryController::write(uint32_t addr, uint8_t* data, uint32_t data_len)
 {
     for (int i = 0; i < data_len; ++i)
     {
-        ram.write(addr + i, data[i])
+        ram->write(addr + i, data[i])
     }
 }
 
@@ -110,9 +110,10 @@ void AxiMemoryController::eval()
             txn.rlast = len == 0;
             txn.rid = *dla.ar_arid;
         
+            // FIXME: What type of data does this read?
             for (int i = 0; i < AXI_WIDTH / AXI_WDATA_TYLEN; i++)
             {
-                txn.rdata[i] = ram.read(addr + i * (AXI_WDATA_TYLEN / 8));
+                txn.rdata[i] = ram->read(addr + i * (AXI_WDATA_TYLEN / 8));
             }
 
             r_fifo.push(txn);

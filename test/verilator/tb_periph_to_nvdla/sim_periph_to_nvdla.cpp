@@ -3,10 +3,11 @@
 #include <stdio.h>
 
 #include <verilated.h>
+#include "Vtb_periph_to_nvdla.h"
 
 #include "FabricController.h"
 #include "AxiMemoryController.h"
-#include "PeriphControl.h"
+#include "PeriphController.h"
 
 
 
@@ -24,40 +25,40 @@ void _close_trace()
 
 int main(int argc, const char **argv, char **env) {
 
-	Vtb_periph_to_nvdla *dla = new Vtb_periph_to_nvdla{"NVDLA"};
+	Vtb_periph_to_nvdla* dla = new Vtb_periph_to_nvdla{"NVDLA"};
 	
-	AxiMemoryController::connections dbbconn
+	AxiMemoryController::Connections dbbconn
 	{
-		.aw_awvalid = &dla->dbb_aw_awvalid,
-		.aw_awready = &dla->dbb_aw_awready,
-		.aw_awid    = &dla->dbb_aw_awid,
-		.aw_awlen   = &dla->dbb_aw_awlen,
-		.aw_awaddr  = &dla->dbb_aw_awaddr,
+		.aw_awvalid = &dla->dbb_aw_valid,
+		.aw_awready = &dla->dbb_aw_ready,
+		.aw_awid    = &dla->dbb_aw_id,
+		.aw_awlen   = &dla->dbb_aw_len,
+		.aw_awaddr  = &dla->dbb_aw_addr,
 		
-		.w_wvalid = &dla->dbb_w_wvalid,
-		.w_wready = &dla->dbb_w_wready,
-		.w_wdata  = &dla->dbb_w_wdata,
-		.w_wstrb  = &dla->dbb_w_wstrb,
-		.w_wlast  = &dla->dbb_w_wlast,
+		.w_wvalid = &dla->dbb_w_valid,
+		.w_wready = &dla->dbb_w_ready,
+		.w_wdata  = &dla->dbb_w_data,
+		.w_wstrb  = &dla->dbb_w_strb,
+		.w_wlast  = &dla->dbb_w_last,
 		
-		.b_bvalid = &dla->dbb_b_bvalid,
-		.b_bready = &dla->dbb_b_bready,
-		.b_bid    = &dla->dbb_b_bid,
+		.b_bvalid = &dla->dbb_b_valid,
+		.b_bready = &dla->dbb_b_ready,
+		.b_bid    = &dla->dbb_b_id,
 
-		.ar_arvalid = &dla->dbb_ar_arvalid,
-		.ar_arready = &dla->dbb_ar_arready,
-		.ar_arid    = &dla->dbb_ar_arid,
-		.ar_arlen   = &dla->dbb_ar_arlen,
-		.ar_araddr  = &dla->dbb_ar_araddr,
+		.ar_arvalid = &dla->dbb_ar_valid,
+		.ar_arready = &dla->dbb_ar_ready,
+		.ar_arid    = &dla->dbb_ar_id,
+		.ar_arlen   = &dla->dbb_ar_len,
+		.ar_araddr  = &dla->dbb_ar_addr,
 	
-		.r_rvalid = &dla->dbb_r_rvalid,
-		.r_rready = &dla->dbb_r_rready,
-		.r_rid    = &dla->dbb_r_rid,
-		.r_rlast  = &dla->dbb_r_rlast,
-		.r_rdata  = &dla->dbb_r_rdata,
+		.r_rvalid = &dla->dbb_r_valid,
+		.r_rready = &dla->dbb_r_ready,
+		.r_rid    = &dla->dbb_r_id,
+		.r_rlast  = &dla->dbb_r_last,
+		.r_rdata  = &dla->dbb_r_data,
 	};
 
-	PeriphConnections periph_connections
+	PeriphController::Connections periph_connections
 	{
 		.req  = &dla->periph_req_i,
 		.add  = &dla->periph_add_i,
@@ -72,10 +73,10 @@ int main(int argc, const char **argv, char **env) {
 	};
 
 
-	AxiMemoryController* axi_dbb = new AxiMemoryController(dbbconn, "DBB");
-	PeriphControl* periph = new PeriphControl(periph_connections, "PeriphCTRL");
+	AxiMemoryController* axi_dbb = new AxiMemoryController{std::move(dbbconn), "DBB"};
+	PeriphController* periph = new PeriphController{std::move(periph_connections), "PeriphCTRL"};
 
-	FabricController* fabric_ctrl = new FabricController("FabricCTRL");
+	FabricController* fabric_ctrl = new FabricController{"FabricCTRL"};
 	fabric_ctrl->attach(periph);
 	fabric_ctrl->attach(axi_dbb);
 
@@ -93,7 +94,7 @@ int main(int argc, const char **argv, char **env) {
 	Verilated::commandArgs(argc, argv);
 	if (argc != 2)
     {
-		fprintf(stderr, "nvdla requires exactly one parameter (a trace file)\n");
+		fprintf(stderr, "NVDLA requires exactly one parameter (a trace file)\n");
 		return 1;
 	}
 	
@@ -160,14 +161,14 @@ int main(int argc, const char **argv, char **env) {
 #endif
 	}
 
-	printf("running trace...\n");
+	printf("Running trace...\n");
 	uint32_t quiesc_timer = 200;
 	while (fabric_ctrl->eval() && quiesc_timer)
 	{
 
 		fabric_ctrl->eval();
 
-		periph_ctrl->eval();
+		periph->eval();
 		
 		axi_dbb->eval();
 
@@ -188,19 +189,14 @@ int main(int argc, const char **argv, char **env) {
 #endif
 	}
 	
-	printf("done at %lu Verilated::time()\n", Verilated::time());
+	printf("Done at %lu Verilated::time()\n", Verilated::time());
 
-	// TODO: Handle the test passed in fabric contrller??
-	if (!trace->test_passed()) {
-		printf("*** FAIL: test failed due to output mismatch\n");
+	if (!fabric_ctrl->test_passed())
+	{
+		fprintf(stderr, "*** FAIL: test failed due to CRC mismatch");
 		return 1;
 	}
-	
-	if (!csb->test_passed()) {
-		printf("*** FAIL: test failed due to CSB read mismatch\n");
-		return 2;
-	}
-	
+
 	printf("*** PASS\n");
 
 	return 0;
