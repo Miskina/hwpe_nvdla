@@ -1,8 +1,8 @@
-#include "PeriphControl.h"
+#include "PeriphController.h"
 
-#define PERIPH_CONTROL_LOG(stream, format, ...) HWPE_NVDLA_COMPONENT_LOG(stream, name_.c_str(), format, __VA_ARGS__) 
-#define PERIPH_CONTROL_INFO(format, ...) PERIPH_CONTROL_LOG(stdout, format, __VA_ARGS__)
-#define PERIPH_CONTROL_ERR(format, ...) PERIPH_CONTROL_LOG(stderr, format, __VA_ARGS__) 
+#define PERIPH_CONTROL_LOG(stream, format, ...) HWPE_NVDLA_COMPONENT_LOG(stream, name_.c_str(), format, ##__VA_ARGS__) 
+#define PERIPH_CONTROL_INFO(format, ...) PERIPH_CONTROL_LOG(stdout, format, ##__VA_ARGS__)
+#define PERIPH_CONTROL_ERR(format, ...) PERIPH_CONTROL_LOG(stderr, format, ##__VA_ARGS__) 
 #define PERIPH_CONTROL_ABORT(...)    \
     HWPE_NVDLA_MACRO_START           \
     PERIPH_CONTROL_ERR("Aborting!"); \
@@ -10,13 +10,13 @@
     HWPE_NVDLA_MACRO_END
 
 
-PeriphControl::PeriphControl(PeriphConnections&& connections, std::string&& name) noexcept
+PeriphController::PeriphController(PeriphController::Connections&& connections, std::string&& name) noexcept
     : name_(std::forward<std::string>(name)),
-      connections_(std::forward<PeriphConnections>(connections))
+      connections_(std::forward<PeriphController::Connections>(connections))
 { }
 
 
-void PeriphControl::submit_operation(ControlOperation&& op, ControlOperationResponse&& response)
+void PeriphController::submit_operation(const ControlOperation& op, ControlOperationResponse&& response)
 {
     *connections_.req  = 1;
     *connections_.add  = op.addr;
@@ -29,12 +29,12 @@ void PeriphControl::submit_operation(ControlOperation&& op, ControlOperationResp
     current_response_ = response;
 }
 
-bool PeriphControl::is_ready()
+bool PeriphController::is_ready()
 {
     return !current_response_;
 }
 
-void PeriphControl::eval() noexcept
+void PeriphController::eval() noexcept
 {
 
     if (current_response_ && connections_.r_valid)
