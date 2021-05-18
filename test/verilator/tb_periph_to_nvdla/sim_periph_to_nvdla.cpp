@@ -24,21 +24,24 @@ void _close_trace()
 
 
 template<typename ClockedVerilatedModel>
-void tick(ClockedVerilatedModel* model, VerilatedVcdC* vcd)
+void tick(ClockedVerilatedModel* model, VerilatedVcdC* vcd, int n = 1)
 {
-	model->clk = 1; 
-	model->eval();
-	Verilated::timeInc(1);
-#if VM_TRACE
-	vcd->dump(Verilated::time());
-#endif // VM_TRACE
+	for (int i = 0; i < n; ++i)
+	{
+		model->clk = 1; 
+		model->eval();
+		Verilated::timeInc(1);
+	#if VM_TRACE
+		vcd->dump(Verilated::time());
+	#endif // VM_TRACE
 
-	model->clk = 0;
-	model->eval();
-	Verilated::timeInc(1);
-#if VM_TRACE
-	vcd->dump(Verilated::time());
-#endif // VM_TRACE
+		model->clk = 0;
+		model->eval();
+		Verilated::timeInc(1);
+	#if VM_TRACE
+		vcd->dump(Verilated::time());
+	#endif // VM_TRACE
+	}
 }
 
 
@@ -125,27 +128,16 @@ int main(int argc, const char **argv, char **env) {
 	printf("Reset...\n");
 	dla->rst = 0;
 	dla->eval();
-	for (int i = 0; i < 20; i++)
-    {
-		tick(dla, tfp);
-	}
+	tick(dla, tfp, 20);
 
 	dla->rst = 1;
 	dla->eval();
-	
-	for (int i = 0; i < 20; i++)
-	{
-		tick(dla, tfp);
-	}
+	tick(dla, tfp, 20);
 	
 	dla->rst = 0;
 	
-	
 	printf("letting buffers clear after reset...\n");
-	for (int i = 0; i < 8192; i++)
-	{
-		tick(dla, tfp);
-	}
+	tick(dla, tfp, 8192);
 
 	printf("Running trace...\n");
 	uint32_t quiesc_timer = 200;
