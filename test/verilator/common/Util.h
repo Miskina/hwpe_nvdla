@@ -111,6 +111,7 @@ namespace util
 
 	template<typename ... VerilatedTypes>
 	VerilatedModel(VerilatedTypes*... models) -> VerilatedModel<VerilatedTypes...>;
+
 }
 
 

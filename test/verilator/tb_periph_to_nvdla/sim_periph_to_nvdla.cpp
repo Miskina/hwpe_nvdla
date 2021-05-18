@@ -10,10 +10,9 @@
 #include "PeriphController.h"
 
 
-
 #if VM_TRACE
 #include <verilated_vcd_c.h>
-VerilatedVcdC* tfp;
+VerilatedVcdC* tfp = nullptr;
 
 void _close_trace()
 {
@@ -21,6 +20,26 @@ void _close_trace()
 }
 
 #endif
+
+
+
+template<typename ClockedVerilatedModel>
+void tick(ClockedVerilatedModel* model, VerilatedVcdC* vcd)
+{
+	model->clk = 1; 
+	model->eval();
+	Verilated::timeInc(1);
+#if VM_TRACE
+	vcd->dump(Verilated::time());
+#endif // VM_TRACE
+
+	model->clk = 0;
+	model->eval();
+	Verilated::timeInc(1);
+#if VM_TRACE
+	vcd->dump(Verilated::time());
+#endif // VM_TRACE
+}
 
 
 int main(int argc, const char **argv, char **env) {
@@ -72,15 +91,18 @@ int main(int argc, const char **argv, char **env) {
 		.r_id	 = &dla->periph_r_id_o,
 	};
 
-
+	Memory<>* ram = new Memory<>{"DBB_RAM"};
 	AxiMemoryController* axi_dbb = new AxiMemoryController{std::move(dbbconn), "DBB"};
+	axi_dbb->attach(ram);
+
 	PeriphController* periph = new PeriphController{std::move(periph_connections), "PeriphCTRL"};
 
 	FabricController* fabric_ctrl = new FabricController{"FabricCTRL"};
 	fabric_ctrl->attach(periph);
 	fabric_ctrl->attach(axi_dbb);
 
-	util::Release _{dla, axi_dbb, periph, fabric_ctrl};
+
+	util::Release _{dla, ram, axi_dbb, periph, fabric_ctrl};
 
 
 #if VM_TRACE
@@ -94,99 +116,45 @@ int main(int argc, const char **argv, char **env) {
 	Verilated::commandArgs(argc, argv);
 	if (argc != 2)
     {
-		fprintf(stderr, "NVDLA requires exactly one parameter (a trace file)\n");
+		fprintf(stderr, "The simulation requires a single parameter - path to a trace file\n");
 		return 1;
 	}
 	
 	fabric_ctrl->load_trace(argv[1]);
 
-	printf("reset...\n");
+	printf("Reset...\n");
 	dla->rst = 0;
 	dla->eval();
 	for (int i = 0; i < 20; i++)
     {
-		dla->clk = 1;
-		dla->eval();
-        Verilated::timeInc(1);
-#if VM_TRACE
-		tfp->dump(Verilated::time());
-#endif
-		
-		dla->clk = 0;
-		dla->eval();
-        Verilated::timeInc(1);
-#if VM_TRACE
-		tfp->dump(Verilated::time());
-#endif
+		tick(dla, tfp);
 	}
 
 	dla->rst = 1;
 	dla->eval();
 	
-	for (int i = 0; i < 20; i++) {
-		dla->clk = 1;
-		dla->eval();
-		Verilated::timeInc(1);
-#if VM_TRACE
-		tfp->dump(Verilated::time());
-#endif
-		
-		dla->clk = 0;
-		dla->eval();
-		Verilated::timeInc(1);
-#if VM_TRACE
-		tfp->dump(Verilated::time());
-#endif
+	for (int i = 0; i < 20; i++)
+	{
+		tick(dla, tfp);
 	}
 	
 	dla->rst = 0;
 	
 	
 	printf("letting buffers clear after reset...\n");
-	for (int i = 0; i < 8192; i++) {
-		dla->clk = 1;
-		
-		dla->eval();
-		Verilated::timeInc(1);
-#if VM_TRACE
-		tfp->dump(Verilated::time());
-#endif
-		
-		dla->clk = 0;
-		
-		dla->eval();
-		Verilated::timeInc(1);
-#if VM_TRACE
-		tfp->dump(Verilated::time());
-#endif
+	for (int i = 0; i < 8192; i++)
+	{
+		tick(dla, tfp);
 	}
 
 	printf("Running trace...\n");
 	uint32_t quiesc_timer = 200;
-	while (fabric_ctrl->eval() && quiesc_timer)
+	while (fabric_ctrl->eval() && quiesc_timer--)
 	{
-
 		fabric_ctrl->eval();
-
 		periph->eval();
-		
 		axi_dbb->eval();
-
-		dla->clk = 1;
-		
-		dla->eval();
-		Verilated::timeInc(1);
-#if VM_TRACE
-		tfp->dump(Verilated::time());
-#endif
-		
-		dla->clk = 0;
-		
-		dla->eval();
-		Verilated::timeInc(1);
-#if VM_TRACE
-		tfp->dump(Verilated::time());
-#endif
+		tick(dla, tfp);
 	}
 	
 	printf("Done at %lu Verilated::time()\n", Verilated::time());

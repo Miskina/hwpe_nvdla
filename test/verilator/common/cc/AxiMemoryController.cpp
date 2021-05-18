@@ -45,7 +45,7 @@ void AxiMemoryController::write(uint32_t addr, uint8_t* data, uint32_t data_len)
 {
     for (int i = 0; i < data_len; ++i)
     {
-        ram->write(addr + i, data[i])
+        ram->write(addr + i, data[i]);
     }
 }
 
@@ -113,7 +113,7 @@ void AxiMemoryController::eval()
             // FIXME: What type of data does this read?
             for (int i = 0; i < AXI_WIDTH / AXI_WDATA_TYLEN; i++)
             {
-                txn.rdata[i] = ram->read(addr + i * (AXI_WDATA_TYLEN / 8));
+                txn.rdata[i] = ram->read<uint64_t>(addr + i * (AXI_WDATA_TYLEN / 8));
             }
 
             r_fifo.push(txn);
@@ -239,4 +239,9 @@ void AxiMemoryController::eval()
         *dla.b_bid = txn.bid;
         b_fifo.pop();
     }
+}
+
+void AxiMemoryController::attach(Memory<>* memory) noexcept
+{
+    ram = memory;
 }

@@ -134,6 +134,8 @@ public:
 	virtual bool is_ready() override;
 	
 	void eval();
+
+	void attach(Memory<>* memory) noexcept;
 };
 
 
