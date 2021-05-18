@@ -36,6 +36,9 @@ public:
 
 private:
 
+    static inline int id_gen = 0;
+
+    uint8_t id_;
     std::string name_{};
     Connections connections_{};
     ControlOperationResponse current_response_{};

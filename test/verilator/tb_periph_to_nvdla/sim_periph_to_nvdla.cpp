@@ -136,7 +136,7 @@ int main(int argc, const char **argv, char **env) {
 	
 	dla->rst = 0;
 	
-	printf("letting buffers clear after reset...\n");
+	printf("Letting buffers clear after reset...\n");
 	tick(dla, tfp, 8192);
 
 	printf("Running trace...\n");

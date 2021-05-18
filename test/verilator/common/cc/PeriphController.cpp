@@ -12,8 +12,11 @@
 
 PeriphController::PeriphController(PeriphController::Connections&& connections, std::string&& name) noexcept
     : name_(std::forward<std::string>(name)),
-      connections_(std::forward<PeriphController::Connections>(connections))
-{ }
+      connections_(std::forward<PeriphController::Connections>(connections)),
+      id_(id_gen++)
+{
+    connections_.id = &id_;
+}
 
 
 void PeriphController::submit_operation(const ControlOperation& op, ControlOperationResponse&& response)
