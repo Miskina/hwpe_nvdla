@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(sim_tb_periph_to_csb)
 
-include(${CMAKE_CURRENT_LIST_DIR}/../common_vars.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/../hwpe_nvdla.cmake)
 
 add_executable(sim sim_tb_periph_to_csb.cpp)
  
