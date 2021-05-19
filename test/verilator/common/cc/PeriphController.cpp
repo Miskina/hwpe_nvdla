@@ -39,6 +39,15 @@ bool PeriphController::is_ready()
 
 void PeriphController::eval() noexcept
 {
+    if (request_accepted_)
+    {
+        connections_.req = 0;
+    }
+
+    if (connections_.req && connections_.gnt)
+    {
+        request_accepted_ = true;
+    }
 
     if (current_response_ && connections_.r_valid)
     {
@@ -53,5 +62,6 @@ void PeriphController::eval() noexcept
 
         current_response_.valid = nullptr;
         current_response_.data = nullptr;
+        request_accepted_ = false;
     }
 }
