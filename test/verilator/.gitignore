@@ -1,3 +1,6 @@
 obj_dir
 build
 logs
+.run_verilator_tests_cache
+CMakeFiles
+*.vcd
