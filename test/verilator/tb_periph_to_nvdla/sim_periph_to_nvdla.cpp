@@ -108,20 +108,27 @@ int main(int argc, const char **argv, char **env) {
 	util::Release _{dla, ram, axi_dbb, periph, fabric_ctrl};
 
 
+	const char* vcd_path = "trace.vcd";
+	Verilated::commandArgs(argc, argv);
+	if (argc < 2)
+    {
+		fprintf(stderr, "The simulation requires at least one parameter - path to a trace file\n");
+		return 1;
+	}
+
+	if (argc == 3)
+	{
+		vcd_path = argv[2];
+	}
+
+
 #if VM_TRACE
 	Verilated::traceEverOn(true);
 	tfp = new VerilatedVcdC;
 	dla->trace(tfp, 99);
-	tfp->open("trace.vcd");
+	tfp->open(vcd_path);
 	atexit(_close_trace);
 #endif
-	
-	Verilated::commandArgs(argc, argv);
-	if (argc != 2)
-    {
-		fprintf(stderr, "The simulation requires a single parameter - path to a trace file\n");
-		return 1;
-	}
 	
 	fabric_ctrl->load_trace(argv[1]);
 
@@ -140,14 +147,14 @@ int main(int argc, const char **argv, char **env) {
 	tick(dla, tfp, 8192);
 
 	printf("Running trace...\n");
-	uint32_t quiesc_timer = 200;
-	while (fabric_ctrl->eval() && quiesc_timer--)
+
+	while (fabric_ctrl->eval())
 	{
-		fabric_ctrl->eval();
 		periph->eval();
 		axi_dbb->eval();
 		tick(dla, tfp);
 	}
+
 	
 	printf("Done at %lu Verilated::time()\n", Verilated::time());
 
