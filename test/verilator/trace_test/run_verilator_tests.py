@@ -111,14 +111,14 @@ class Log:
         msg  = self._get_log_msg(msg)
         self._log_msg(msg, LogLevel.INFO, self.root_level)
         for logfile, level, path in self.logfiles.values():
-            self._log_msg(msg, LogLevel.INFO, self.root_level, logfile)
+            self._log_msg(msg, LogLevel.INFO, level, logfile)
                 
 
     def debug(self, msg):
         msg  = self._get_log_msg(msg)
         self._log_msg(msg, LogLevel.DEBUG, self.root_level)
         for logfile, level, path in self.logfiles.values():
-            self._log_msg(msg, LogLevel.DEBUG, self.root_level, logfile)
+            self._log_msg(msg, LogLevel.DEBUG, level, logfile)
             
 
     def _add_logfile_impl(self, name, path, level):
@@ -239,6 +239,10 @@ common.add_argument('--no-cache',
 
 common.add_argument('testbench',
                     help='Name of the testbench you want to test')
+common.add_argument('--vcd',
+		    required=False,
+		    type=str,
+		    help='Directory where VCD traces will be saved')
 
 subparsers = parser.add_subparsers(title='Run options', required=True, description='Multiple ways of specifiying which tests you want to run.', dest='command')
 
@@ -282,6 +286,12 @@ return_code_dict = defaultdict(list)
 
 cache = RunCache(args)
 
+vcd_trace_dir = None
+if args.vcd:
+    vcd_trace_dir = os.path.join(args.vcd, testbench)
+    os.makedirs(vcd_trace_dir, exist_ok=True)
+
+
 for i, filename in enumerate(tests, start=1):
     filename = filename.strip()
     test = os.path.join(nvdla_root, 'outdir', 'nv_small', 'verilator', 'test', filename, 'trace.bin')
@@ -297,8 +307,12 @@ for i, filename in enumerate(tests, start=1):
 
     testbenches_root = '../'
     simulation = os.path.join(testbenches_root, testbench, 'build', testbench)
+    sim_args = [simulation, test]
+    if vcd_trace_dir:
+        trace_loc = os.path.join(vcd_trace_dir, filename + '.vcd')
+        sim_args.append(trace_loc)
 
-    with sp.Popen([simulation, test],
+    with sp.Popen(sim_args,
                   stdout=sp.PIPE,
                   stderr=sp.PIPE,
                   #cwd=verilator_dir,
