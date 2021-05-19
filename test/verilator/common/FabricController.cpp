@@ -70,7 +70,19 @@ TraceCommand FabricController::read_trace_command()
 {
     TraceCommand cmd = TraceCommand::Invalid;
 
-    fread(&cmd, sizeof(cmd), 1, trace_file_);
+    if (feof(trace_file_))
+    {
+        FABRIC_CONTROLLER_ERR("Unexpected End Of File!");
+        FABRIC_CONTROLLER_ABORT();
+    }
+
+    if (fread(&cmd, sizeof(cmd), 1, trace_file_) < 1)
+    {
+        FABRIC_CONTROLLER_ERR("Failed to read trace command from file");
+        FABRIC_CONTROLLER_ABORT();
+    }
+
+    FABRIC_CONTROLLER_INFO("Read trace command: '%s'", TRACE_COMMAND_NAME(cmd));
 
     return cmd;
 }
@@ -154,8 +166,10 @@ void FabricController::execute_current_command()
 
                 read_from_trace(&addr, &len);
                 buffer = new uint8_t[len];
-                
+                read_from_trace(buffer, len);
                 memory_ctrl_->write(addr, buffer, len);
+
+                delete[] buffer;
 
                 current_command = TraceCommand::Invalid;
             }
@@ -167,7 +181,10 @@ void FabricController::execute_current_command()
             uint32_t mask;
 
             read_from_trace(&id, &mask);
-            sync_points_.emplace(TRACE_SYNCPT_MASK | id, mask);
+            sync_points_.emplace_back(id, mask);
+
+            FABRIC_CONTROLLER_INFO("Registering sync point %u = %08x", id, mask);
+
             ++sync_points_to_process;
             current_command = TraceCommand::Invalid;
             break;
@@ -183,7 +200,7 @@ void FabricController::execute_current_command()
             uint32_t sp_id;
             read_from_trace(&sp_id);
 
-            SyncPoint& point = sync_points_[sp_id];
+            SyncPoint& point = find_syncpoint(sp_id);
             read_from_trace(&point.base, &point.size, &point.crc);
 
             current_command = TraceCommand::Invalid;
@@ -248,14 +265,19 @@ void FabricController::process_sync_point(SyncPoint& sync_point) noexcept
 {
     ctrl_intf_->submit_operation(ControlOperation::Write(interrupt_status_addr, sync_point.mask), {});
 
+    FABRIC_CONTROLLER_INFO("Processing sync point: %d!", sync_point.id);
     if (!sync_point.is_noop())
     {
         uint32_t calculated_crc = calculate_crc(sync_point.base, sync_point.size, memory_ctrl_);
+        FABRIC_CONTROLLER_ERR("CRC: expected = %08x, calculated = %08x",
+                                sync_point.crc, calculated_crc);
         if (sync_point.crc != calculated_crc)
         {
             test_passed_ = false;
-            FABRIC_CONTROLLER_ERR("CRC check failed, expected = %08x, calculated = %08x",
-                                  sync_point.crc, calculated_crc);
+        }
+        else
+        {
+            FABRIC_CONTROLLER_INFO("CRC Passed for sync point: %u", sync_point.id);
         }
     }
 
@@ -266,7 +288,7 @@ void FabricController::process_sync_point(SyncPoint& sync_point) noexcept
 void FabricController::process_sync_points() noexcept
 {
     uint32_t status = ~interrupt_mask & interrupt_status;
-    for (auto& [id, sync_point] : sync_points_)
+    for (auto& sync_point : sync_points_)
     {
         if (!sync_point.processed && (status & sync_point.mask) == sync_point.mask)
         {
@@ -278,7 +300,7 @@ void FabricController::process_sync_points() noexcept
 
 bool FabricController::sync_points_finished() const noexcept
 {
-    return sync_points_to_process > 0;
+    return sync_points_to_process <= 0;
 }
 
 bool FabricController::eval()
@@ -297,13 +319,13 @@ bool FabricController::eval()
 
     if (trace_file_processed() && !sync_points_finished())
     {
-        if (ctrl_intf_->is_ready())
+        if (!interrupt_mask_valid && ctrl_intf_->is_ready())
         {
             ctrl_intf_->submit_operation(ControlOperation::Read(interrupt_mask_addr),
                     {&interrupt_mask_valid, &interrupt_mask});
         }
 
-        if (ctrl_intf_->is_ready())
+        if (!interrupt_status_valid && ctrl_intf_->is_ready())
         {
             ctrl_intf_->submit_operation(ControlOperation::Read(interrupt_status_addr),
                     {&interrupt_status_valid, &interrupt_status});
@@ -312,9 +334,11 @@ bool FabricController::eval()
         if (interrupt_mask_valid && interrupt_status_valid)
         {
             process_sync_points();
+            interrupt_mask_valid = false;
+            interrupt_status_valid = false;
         }
 
-        return true;
+        return test_passed_;
     }
 
     return false;
@@ -323,4 +347,17 @@ bool FabricController::eval()
 bool FabricController::test_passed() const noexcept
 {
     return test_passed_;
+}
+
+
+FabricController::SyncPoint& FabricController::find_syncpoint(const uint32_t sp_id) noexcept
+{
+    for (auto& point : sync_points_)
+    {
+        if (point.id == sp_id)
+        {
+            return point;
+        }
+    }
+    return sync_points_.emplace_back(sp_id);
 }
