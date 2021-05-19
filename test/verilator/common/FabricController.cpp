@@ -84,7 +84,7 @@ void FabricController::read_from_trace(uint8_t* data, size_t size)
     }
 }
 
-bool FabricController::execute_current_command()
+void FabricController::execute_current_command()
 {
 
     if (current_command == TraceCommand::Invalid)
@@ -211,7 +211,6 @@ bool FabricController::execute_current_command()
         }
     }
 
-    return true;
 }
 
 
@@ -284,19 +283,19 @@ bool FabricController::sync_points_finished() const noexcept
 
 bool FabricController::eval()
 {
-    if (!trace_file_processing_finished_)
+    if (!trace_file_processed())
     {
         if (current_command == TraceCommand::Invalid)
         {
             current_command = read_trace_command();
         }
 
-        trace_file_processing_finished_ = execute_current_command();
+        execute_current_command();
 
         return true;
     }
 
-    if (trace_file_processing_finished_ && !sync_points_finished())
+    if (trace_file_processed() && !sync_points_finished())
     {
         if (ctrl_intf_->is_ready())
         {

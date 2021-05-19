@@ -60,7 +60,12 @@ private:
         (read_from_trace(reinterpret_cast<uint8_t*>(datas), sizeof(Ts)), ...);
     }
 
-    bool execute_current_command();
+    void execute_current_command();
+    
+    bool trace_file_processed() const noexcept
+    {
+        return trace_file_ == nullptr; 
+    }
 
     std::string name_;
 
@@ -68,7 +73,6 @@ private:
     ControlInterface* ctrl_intf_ = nullptr;
 
     FILE* trace_file_ = nullptr;
-    bool trace_file_processing_finished_ = true;
 
     TraceCommand current_command = TraceCommand::Invalid;
 
