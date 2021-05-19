@@ -32,29 +32,10 @@ AxiMemoryController::AxiMemoryController(AxiMemoryController::Connections&& _dla
     }
 }
 
-void AxiMemoryController::read(uint32_t addr, uint8_t* data, uint32_t data_len)
-{
-    for (int i = 0; i < data_len; ++i)
-    {
-        data[i] = ram->read<uint8_t>(addr + i);
-    }
-}
-
-
-void AxiMemoryController::write(uint32_t addr, uint8_t* data, uint32_t data_len)
-{
-    for (int i = 0; i < data_len; ++i)
-    {
-        ram->write(addr + i, data[i]);
-    }
-}
-
-
 bool AxiMemoryController::is_ready()
 {
     return true;
 }
-
 
 void AxiMemoryController::eval()
 {
@@ -238,9 +219,4 @@ void AxiMemoryController::eval()
         *dla.b_bid = txn.bid;
         b_fifo.pop();
     }
-}
-
-void AxiMemoryController::attach(Memory<>* memory) noexcept
-{
-    ram = memory;
 }

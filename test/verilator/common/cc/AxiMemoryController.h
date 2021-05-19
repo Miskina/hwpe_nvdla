@@ -119,23 +119,16 @@ private:
 	
     std::queue<axi_b_txn> b_fifo;
 	
-	Memory<>* ram;
-	
 	Connections dla;
 	const char *name;
 	
 public:	
 	AxiMemoryController(Connections&& _dla, const char *_name) noexcept;
 
-	virtual void read(uint32_t addr, uint8_t* data, uint32_t data_len) override;
-	
-	virtual void write(uint32_t addr, uint8_t* data, uint32_t data_len) override;
-
 	virtual bool is_ready() override;
 	
-	void eval();
+	virtual void eval() override;
 
-	void attach(Memory<>* memory) noexcept;
 };
 
 
