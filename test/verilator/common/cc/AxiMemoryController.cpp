@@ -110,7 +110,6 @@ void AxiMemoryController::eval()
             txn.rlast = len == 0;
             txn.rid = *dla.ar_arid;
         
-            // FIXME: What type of data does this read?
             for (int i = 0; i < AXI_WIDTH / AXI_WDATA_TYLEN; i++)
             {
                 txn.rdata[i] = ram->read<uint64_t>(addr + i * (AXI_WDATA_TYLEN / 8));
@@ -166,7 +165,7 @@ void AxiMemoryController::eval()
         
         if (wtxn.wlast)
         {
-            printf("(%lu) %s: write, last tick\n", Verilated::time(), name);
+            printf("(%lu) [%s] - write, last tick\n", Verilated::time(), name);
             aw_fifo.pop();
 
             axi_b_txn btxn;
@@ -175,7 +174,7 @@ void AxiMemoryController::eval()
         }
         else
         {
-            printf("(%lu) %s: write, Verilated::time() remaining\n", Verilated::time(), name);
+            printf("(%lu) [%s] - write, Verilated::time() remaining\n", Verilated::time(), name);
 
             awtxn.awlen--;
             awtxn.awaddr += AXI_WIDTH / 8;

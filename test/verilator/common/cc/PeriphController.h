@@ -38,6 +38,7 @@ private:
 
     static inline int id_gen = 0;
     bool request_accepted_ = false;
+    bool operation_pending_ = false;
     uint8_t id_;
     std::string name_{};
     Connections connections_{};

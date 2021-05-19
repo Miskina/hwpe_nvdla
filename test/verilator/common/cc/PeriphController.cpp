@@ -30,38 +30,44 @@ void PeriphController::submit_operation(const ControlOperation& op, ControlOpera
 
     current_id_       = op.id;
     current_response_ = response;
+
+    operation_pending_ = true;
 }
 
 bool PeriphController::is_ready()
 {
-    return !current_response_;
+    return !operation_pending_;
 }
 
 void PeriphController::eval() noexcept
 {
     if (request_accepted_)
     {
-        connections_.req = 0;
+        *connections_.req = 0;
     }
 
-    if (connections_.req && connections_.gnt)
+    if (*connections_.req && *connections_.gnt)
     {
         request_accepted_ = true;
     }
 
-    if (current_response_ && connections_.r_valid)
+    if (request_accepted_ && *connections_.r_valid)
     {
         if (*connections_.r_id != current_id_)
         {
             PERIPH_CONTROL_ERR("Mismatched ID and R_ID: id=%08x, r_id=%08x", current_id_, *connections_.r_id);
             PERIPH_CONTROL_ABORT();
         }
+        
+        if (current_response_)
+        {
+            *current_response_.valid = static_cast<bool>(*connections_.r_valid);
+            *current_response_.data  = *connections_.r_data;
+            current_response_.valid = nullptr;
+            current_response_.data = nullptr;
+        }
 
-        *current_response_.valid = static_cast<bool>(*connections_.r_valid);
-        *current_response_.data  = *connections_.data;
-
-        current_response_.valid = nullptr;
-        current_response_.data = nullptr;
         request_accepted_ = false;
+        operation_pending_ = false;
     }
 }
