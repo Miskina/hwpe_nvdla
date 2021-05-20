@@ -2,7 +2,7 @@
 `define TCDM_TO_AXI2MEM                                     \
     .tcdm_master_req_o    ( `TCDM_CONCAT(tcdm_req_o)     ), \
     .tcdm_master_add_o    ( `TCDM_CONCAT(tcdm_add_o)     ), \
-    .tcdm_master_type_o   ( `TCDM_CONCAT(tcdm_type_o)    ), \
+    .tcdm_master_wen_o    ( `TCDM_CONCAT(tcdm_wen_o)     ), \
     .tcdm_master_be_o     ( `TCDM_CONCAT(tcdm_be_o)      ), \
     .tcdm_master_data_o   ( `TCDM_CONCAT(tcdm_data_o)    ), \
     .tcdm_master_gnt_i    ( `TCDM_CONCAT(tcdm_gnt_i)     ), \
@@ -15,10 +15,11 @@
 
 `define AXI_AxSIZE 3'b110
 
-`define AXI_SIGNAL_UNUSED '0
+`define AXI_SIGNAL_UNUSED_I '0
+`define AXI_SIGNAL_UNUSED_O 
 
 
-module tb_tcdm_to_axi2mem_nvdla #(
+module tb_hwpe_nvdla #(
     localparam ID_WIDTH = 1,
     localparam NVDLA_DBB_AW_ADDR_WIDTH = 32,
     localparam NVDLA_DBB_AR_ADDR_WIDTH = 32,
@@ -45,7 +46,7 @@ module tb_tcdm_to_axi2mem_nvdla #(
     // REQUEST CHANNEL 0
     output logic           tcdm_req_o_0,
     output logic [31:0]    tcdm_add_o_0,
-    output logic           tcdm_type_o_0,
+    output logic           tcdm_wen_o_0,
     output logic [3:0]     tcdm_be_o_0,
     output logic [31:0]    tcdm_data_o_0,
     input  logic           tcdm_gnt_i_0,
@@ -57,7 +58,7 @@ module tb_tcdm_to_axi2mem_nvdla #(
     // REQUEST CHANNEL 1
     output logic           tcdm_req_o_1,
     output logic [31:0]    tcdm_add_o_1,
-    output logic           tcdm_type_o_1,
+    output logic           tcdm_wen_o_1,
     output logic [3:0]     tcdm_be_o_1,
     output logic [31:0]    tcdm_data_o_1,
     input  logic           tcdm_gnt_i_1,
@@ -69,7 +70,7 @@ module tb_tcdm_to_axi2mem_nvdla #(
     // REQUEST CHANNEL 2
     output logic           tcdm_req_o_2,
     output logic [31:0]    tcdm_add_o_2,
-    output logic           tcdm_type_o_2,
+    output logic           tcdm_wen_o_2,
     output logic [3:0]     tcdm_be_o_2,
     output logic [31:0]    tcdm_data_o_2,
     input  logic           tcdm_gnt_i_2,
@@ -81,7 +82,7 @@ module tb_tcdm_to_axi2mem_nvdla #(
     // REQUEST CHANNEL 3
     output logic           tcdm_req_o_3,
     output logic [31:0]    tcdm_add_o_3,
-    output logic           tcdm_type_o_3,
+    output logic           tcdm_wen_o_3,
     output logic [3:0]     tcdm_be_o_3,
     output logic [31:0]    tcdm_data_o_3,
     input  logic           tcdm_gnt_i_3,
@@ -109,57 +110,57 @@ module tb_tcdm_to_axi2mem_nvdla #(
         .busy_o   (      ),
 
         // WRITE ADDRESS CHANNEL
-        .axi_slave_aw_valid_i ( dbb.aw_valid       ),
-        .axi_slave_aw_addr_i  ( dbb.aw_addr        ),
-        .axi_slave_aw_prot_i  ( `AXI_SIGNAL_UNUSED ),
-        .axi_slave_aw_region_i( `AXI_SIGNAL_UNUSED ),
-        .axi_slave_aw_len_i   ( {4'h0, dbb.aw_len} ),
-        .axi_slave_aw_size_i  ( `AXI_AxSIZE        ),
-        .axi_slave_aw_burst_i ( `AXI_SIGNAL_UNUSED ),
-        .axi_slave_aw_lock_i  ( `AXI_SIGNAL_UNUSED ),
-        .axi_slave_aw_cache_i ( `AXI_SIGNAL_UNUSED ),
-        .axi_slave_aw_qos_i   ( `AXI_SIGNAL_UNUSED ),
-        .axi_slave_aw_id_i    ( dbb.aw_id          ),
-        .axi_slave_aw_user_i  ( `AXI_SIGNAL_UNUSED ),
-        .axi_slave_aw_ready_o ( dbb.aw_ready       ),
+        .axi_slave_aw_valid_i ( dbb.aw_valid         ),
+        .axi_slave_aw_addr_i  ( dbb.aw_addr          ),
+        .axi_slave_aw_prot_i  ( `AXI_SIGNAL_UNUSED_I ),
+        .axi_slave_aw_region_i( `AXI_SIGNAL_UNUSED_I ),
+        .axi_slave_aw_len_i   ( {4'h0, dbb.aw_len}   ),
+        .axi_slave_aw_size_i  ( `AXI_AxSIZE          ),
+        .axi_slave_aw_burst_i ( `AXI_SIGNAL_UNUSED_I ),
+        .axi_slave_aw_lock_i  ( `AXI_SIGNAL_UNUSED_I ),
+        .axi_slave_aw_cache_i ( `AXI_SIGNAL_UNUSED_I ),
+        .axi_slave_aw_qos_i   ( `AXI_SIGNAL_UNUSED_I ),
+        .axi_slave_aw_id_i    ( dbb.aw_id            ),
+        .axi_slave_aw_user_i  ( `AXI_SIGNAL_UNUSED_I ),
+        .axi_slave_aw_ready_o ( dbb.aw_ready         ),
 
         // READ ADDRESS CHANNEL
-        .axi_slave_ar_valid_i ( dbb.ar_valid       ),
-        .axi_slave_ar_addr_i  ( dbb.ar_addr        ),
-        .axi_slave_ar_prot_i  ( `AXI_SIGNAL_UNUSED ),
-        .axi_slave_ar_region_i( `AXI_SIGNAL_UNUSED ),
-        .axi_slave_ar_len_i   ( {4'h0, dbb.ar_len} ),
-        .axi_slave_ar_size_i  ( `AXI_AxSIZE        ),
-        .axi_slave_ar_burst_i ( `AXI_SIGNAL_UNUSED ),
-        .axi_slave_ar_lock_i  ( `AXI_SIGNAL_UNUSED ),
-        .axi_slave_ar_cache_i ( `AXI_SIGNAL_UNUSED ),
-        .axi_slave_ar_qos_i   ( `AXI_SIGNAL_UNUSED ),
-        .axi_slave_ar_id_i    ( dbb.ar_id          ),
-        .axi_slave_ar_user_i  ( `AXI_SIGNAL_UNUSED ),
-        .axi_slave_ar_ready_o ( dbb.ar_ready       ),
+        .axi_slave_ar_valid_i ( dbb.ar_valid         ),
+        .axi_slave_ar_addr_i  ( dbb.ar_addr          ),
+        .axi_slave_ar_prot_i  ( `AXI_SIGNAL_UNUSED_I ),
+        .axi_slave_ar_region_i( `AXI_SIGNAL_UNUSED_I ),
+        .axi_slave_ar_len_i   ( { 4'h0, dbb.ar_len } ),
+        .axi_slave_ar_size_i  ( `AXI_AxSIZE          ),
+        .axi_slave_ar_burst_i ( `AXI_SIGNAL_UNUSED_I ),
+        .axi_slave_ar_lock_i  ( `AXI_SIGNAL_UNUSED_I ),
+        .axi_slave_ar_cache_i ( `AXI_SIGNAL_UNUSED_I ),
+        .axi_slave_ar_qos_i   ( `AXI_SIGNAL_UNUSED_I ),
+        .axi_slave_ar_id_i    ( dbb.ar_id            ),
+        .axi_slave_ar_user_i  ( `AXI_SIGNAL_UNUSED_I ),
+        .axi_slave_ar_ready_o ( dbb.ar_ready         ),
 
         // WRITE DATA CHANNEL
-        .axi_slave_w_valid_i( dbb.w_valid        ),
-        .axi_slave_w_data_i ( dbb.w_data         ),
-        .axi_slave_w_strb_i ( dbb.w_strb         ),
-        .axi_slave_w_user_i ( `AXI_SIGNAL_UNUSED ),
-        .axi_slave_w_last_i ( dbb.w_last         ),
-        .axi_slave_w_ready_o( dbb.w_ready        ),
+        .axi_slave_w_valid_i( dbb.w_valid          ),
+        .axi_slave_w_data_i ( dbb.w_data           ),
+        .axi_slave_w_strb_i ( dbb.w_strb           ),
+        .axi_slave_w_user_i ( `AXI_SIGNAL_UNUSED_I ),
+        .axi_slave_w_last_i ( dbb.w_last           ),
+        .axi_slave_w_ready_o( dbb.w_ready          ),
 
-        .axi_slave_b_valid_o( dbb.b_valid        ),
-        .axi_slave_b_resp_o ( `AXI_SIGNAL_UNUSED ),
-        .axi_slave_b_id_o   ( dbb.b_id           ),
-        .axi_slave_b_user_o ( `AXI_SIGNAL_UNUSED ),
-        .axi_slave_b_ready_i( dbb.b_ready        ),
+        .axi_slave_b_valid_o( dbb.b_valid          ),
+        .axi_slave_b_resp_o ( `AXI_SIGNAL_UNUSED_O ),
+        .axi_slave_b_id_o   ( dbb.b_id             ),
+        .axi_slave_b_user_o ( `AXI_SIGNAL_UNUSED_O ),
+        .axi_slave_b_ready_i( dbb.b_ready          ),
 
         // READ DATA CHANNEL
-        .axi_slave_r_valid_o( dbb.r_valid        ),
-        .axi_slave_r_data_o ( dbb.r_data         ),
-        .axi_slave_r_resp_o ( `AXI_SIGNAL_UNUSED ),
-        .axi_slave_r_last_o ( dbb.r_last         ),
-        .axi_slave_r_id_o   ( dbb.r_id           ),
-        .axi_slave_r_user_o ( `AXI_SIGNAL_UNUSED ),
-        .axi_slave_r_ready_i( dbb.r_ready        ),
+        .axi_slave_r_valid_o( dbb.r_valid          ),
+        .axi_slave_r_data_o ( dbb.r_data           ),
+        .axi_slave_r_resp_o ( `AXI_SIGNAL_UNUSED_O ),
+        .axi_slave_r_last_o ( dbb.r_last           ),
+        .axi_slave_r_id_o   ( dbb.r_id             ),
+        .axi_slave_r_user_o ( `AXI_SIGNAL_UNUSED_O ),
+        .axi_slave_r_ready_i( dbb.r_ready          ),
 
         `TCDM_TO_AXI2MEM
     );
