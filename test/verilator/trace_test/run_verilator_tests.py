@@ -129,7 +129,7 @@ class Log:
         if not self.log_dir:
             return
 
-        path = os.path.join(self.log_dir, name + '.logs')
+        path = os.path.join(self.log_dir, name + '.log')
         self._add_logfile_impl(name, path, level)
 
     
