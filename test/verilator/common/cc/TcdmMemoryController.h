@@ -5,6 +5,7 @@
 #include<queue>
 #include<cstdint>
 #include<cstdio>
+#include <sstream>
 
 #include<verilated.h>
 
@@ -34,9 +35,14 @@ public:
 
     TcdmMemoryController(std::array<TcdmConnections, N>&& connections, std::string&& name) noexcept
     {
-        for (char i = '0'; i < N + '0'; ++i)
+        std::ostringstream string_stream{};
+        for (int i = 0; i < N; ++i)
         {
-            tcdm_buses_[i] = SingleTcdmController(name + std::string("[") + i + std::string("]"), std::move(connections[i]));
+            string_stream.str(std::string{});
+            string_stream << name << '[' << i << ']';
+            tcdm_buses_[i] = SingleTcdmController(string_stream.str(),
+                                                  std::move(connections[i]),
+                                                  this);
         }
     }
 
@@ -63,19 +69,22 @@ class SingleTcdmController
 
 public:
 
-    template<int N>
-    SingleTcdmController(std::string&& name, TcdmConnections&& slave)
-            : name_(name), slave_(slave) { }
+    SingleTcdmController(std::string&& name,
+                         TcdmConnections&& slave,
+                         MemoryController* ctrl)
+            : name_(name), slave_(slave), ctrl_(ctrl) { }
 
     SingleTcdmController() = default;
 
     void eval() noexcept;
+
 
 private:
 
     std::string name_;
     TcdmConnections slave_;
     std::queue<uint32_t> response_queue_;
+    MemoryController* ctrl_;
 
     bool is_stall();
 

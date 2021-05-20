@@ -3,6 +3,8 @@
 
 #include <cstdint>
 
+#include "Memory.h"
+
 class MemoryController
 {
 public:
@@ -23,7 +25,7 @@ public:
         }
     }
 
-	void attach(Memory<>* memory) noexcept
+	void attach(Memory* memory) noexcept
     {
         ram = memory;
     }
@@ -33,7 +35,7 @@ public:
     virtual void eval() = 0;
 
 protected:
-	Memory<>* ram;
+	Memory* ram;
 
 };
 

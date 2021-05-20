@@ -36,7 +36,7 @@ bool test(const char* test_name,
 
 int main()
 {
-    Memory<> mem{"Memorija"};
+    Memory mem{"Memorija"};
 
     test("Test_uint32_t",
          1000,

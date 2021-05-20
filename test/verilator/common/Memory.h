@@ -10,15 +10,14 @@
 
 #define PAGE_SIZE 4096
 
-template<size_t BlockSize = PAGE_SIZE>
+
 class Memory
 {
-    static_assert(BlockSize % alignof(int) == 0, "The block size must be at least aligned to int");
 
 public:
 
-    Memory(std::string&& name) noexcept 
-        : name_(std::forward<std::string>(name))
+    Memory(std::string&& name, const size_t block_size = PAGE_SIZE) noexcept 
+        : name_(std::forward<std::string>(name)), block_size_(block_size)
     {
     }
 
@@ -30,7 +29,7 @@ public:
         static_assert(std::is_integral<DataType>::value,
                       "The DataType must be an integral type!");
 
-        auto ram_it = ram_.find(address / BlockSize);
+        auto ram_it = ram_.find(address / block_size_);
         if (ram_it == ram_.end())
         {
             return 0;
@@ -38,7 +37,7 @@ public:
 
         const auto& mem_block = ram_it->second;
         const AddressType misalignment = address % alignof(DataType);
-        DataType value = *(reinterpret_cast<const DataType*>(&mem_block[(address % BlockSize) - misalignment]));
+        DataType value = *(reinterpret_cast<const DataType*>(&mem_block[(address % block_size_) - misalignment]));
 
         if (!misalignment) 
         {
@@ -60,11 +59,11 @@ public:
         static_assert(std::is_integral<AddressType>::value,
                       "AddressType must be an integral type!");
 
-        auto& mem_block = ram_[address / BlockSize];
-        mem_block.resize(BlockSize, 0);
+        auto& mem_block = ram_[address / block_size_];
+        mem_block.resize(block_size_, 0);
 
         const AddressType misalignment = address % alignof(DataType);
-        const AddressType aligned_address = (address % BlockSize) - misalignment;
+        const AddressType aligned_address = (address % block_size_) - misalignment;
 
         DataType* mem_block_data = reinterpret_cast<DataType*>(&mem_block[aligned_address]);
 
@@ -91,15 +90,15 @@ public:
     }
 
 
-    const std::string& name() const noexcept
-    {
-        return name_;
-    }
+    const std::string& name() const noexcept;
+
+    size_t block_size() const noexcept;
 
 private:
 
     std::unordered_map<uint32_t, std::vector<uint8_t>> ram_;
     std::string name_;
+    const size_t block_size_;
 
 };
 

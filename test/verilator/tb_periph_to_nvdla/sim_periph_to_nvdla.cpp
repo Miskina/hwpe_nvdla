@@ -94,7 +94,7 @@ int main(int argc, const char **argv, char **env) {
 		.r_id	 = &dla->periph_r_id_o,
 	};
 
-	Memory<>* ram = new Memory<>{"DBB_RAM"};
+	Memory* ram = new Memory{"DBB_RAM"};
 	AxiMemoryController* axi_dbb = new AxiMemoryController{std::move(dbbconn), "DBB"};
 	axi_dbb->attach(ram);
 
