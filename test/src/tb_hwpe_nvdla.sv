@@ -2,7 +2,7 @@
 `define TCDM_TO_AXI2MEM                                     \
     .tcdm_master_req_o    ( `TCDM_CONCAT(tcdm_req_o)     ), \
     .tcdm_master_add_o    ( `TCDM_CONCAT(tcdm_add_o)     ), \
-    .tcdm_master_wen_o    ( `TCDM_CONCAT(tcdm_wen_o)     ), \
+    .tcdm_master_type_o   ( `TCDM_CONCAT(tcdm_wen_o)     ), \
     .tcdm_master_be_o     ( `TCDM_CONCAT(tcdm_be_o)      ), \
     .tcdm_master_data_o   ( `TCDM_CONCAT(tcdm_data_o)    ), \
     .tcdm_master_gnt_i    ( `TCDM_CONCAT(tcdm_gnt_i)     ), \
