@@ -4,7 +4,7 @@
 #include <array>
 
 #include <verilated.h>
-#include "Vtb_periph_to_nvdla.h"
+#include "Vtb_hwpe_nvdla.h"
 
 #include "Memory.h"
 #include "TcdmMemoryController.h"
@@ -63,7 +63,7 @@ int main(int argc, const char **argv, char **env) {
 
 	Vtb_hwpe_nvdla* dla = new Vtb_hwpe_nvdla{"HWPE NVDLA"};
 	
-	std::array<TcdmMemoryController::Connections, 4> tcdm_connections
+	std::array<TcdmConnections, 4> tcdm_connections
 	{
 		{
 			TCDM_CONNECTION(0, dla)
