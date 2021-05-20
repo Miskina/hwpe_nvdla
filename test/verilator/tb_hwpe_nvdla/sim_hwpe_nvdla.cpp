@@ -13,15 +13,15 @@
 
 #define TCDM_PORT_NAME(name, i) name ## _ ## i
 
-#define TCDM_CONNECTION(i, model)                         \
-	.req =     &model->TCDM_PORT_NAME(tcdm_req_o,     i), \
-	.gnt =     &model->TCDM_PORT_NAME(tcdm_gnt_i,     i), \
-	.add =     &model->TCDM_PORT_NAME(tcdm_add_o,     i), \
-	.wen =     &model->TCDM_PORT_NAME(tcdm_wen_o,     i), \
-	.be =      &model->TCDM_PORT_NAME(tcdm_be_o,      i), \
-	.data =    &model->TCDM_PORT_NAME(tcdm_data_o,    i), \
-	.r_data =  &model->TCDM_PORT_NAME(tcdm_r_data_i,  i), \
-	.r_valid = &model->TCDM_PORT_NAME(tcdm_r_valid_i, i),
+#define TCDM_CONNECTION(i, model)                         	   						    \
+	/*.req =     */ reinterpret_cast<bool*>(&model->TCDM_PORT_NAME(tcdm_req_o,     i)), \
+	/*.gnt =     */ reinterpret_cast<bool*>(&model->TCDM_PORT_NAME(tcdm_gnt_i,     i)), \
+	/*.add =     */ &model->TCDM_PORT_NAME(tcdm_add_o,     i), 							\
+	/*.wen =     */ reinterpret_cast<bool*>(&model->TCDM_PORT_NAME(tcdm_wen_o,     i)), \
+	/*.be =      */ &model->TCDM_PORT_NAME(tcdm_be_o,      i), 							\
+	/*.data =    */ &model->TCDM_PORT_NAME(tcdm_data_o,    i), 							\
+	/*.r_data =  */ &model->TCDM_PORT_NAME(tcdm_r_data_i,  i), 							\
+	/*.r_valid = */ reinterpret_cast<bool*>(&model->TCDM_PORT_NAME(tcdm_r_valid_i, i))
 
 
 #if VM_TRACE
@@ -65,18 +65,10 @@ int main(int argc, const char **argv, char **env) {
 	
 	std::array<TcdmConnections, 4> tcdm_connections
 	{
-		{
-			TCDM_CONNECTION(0, dla)
-		},
-		{
-			TCDM_CONNECTION(1, dla)
-		},
-		{
-			TCDM_CONNECTION(2, dla)
-		},
-		{
-			TCDM_CONNECTION(3, dla)
-		}
+		TCDM_CONNECTION(0, dla),
+		TCDM_CONNECTION(1, dla),
+		TCDM_CONNECTION(2, dla),
+		TCDM_CONNECTION(3, dla)
 	};
 
 	PeriphController::Connections periph_connections
@@ -93,7 +85,7 @@ int main(int argc, const char **argv, char **env) {
 		.r_id	 = &dla->periph_r_id_o,
 	};
 
-	Memory<>* ram = new Memory<>{"TCDM_RAM"};
+	Memory* ram = new Memory{"TCDM_RAM"};
 	auto* mem_ctrl = new TcdmMemoryController<4>{std::move(tcdm_connections), "TCDM_MEM"};
 	mem_ctrl->attach(ram);
 
