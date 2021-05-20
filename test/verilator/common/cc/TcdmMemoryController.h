@@ -12,23 +12,12 @@
 #include "MemoryController.h"
 
 
-struct TcdmBusConnection {
-    bool*     req;
-    bool*     gnt;
-    uint32_t* add;
-    bool*     wen;
-    uint8_t*  be;
-    uint32_t* data;
-    uint32_t* r_data;
-    bool*     r_valid;
-};
-
 class SingleTcdmController : public MemoryController
 {
 
 public:
 
-    constexpr SingleTcdmController(std::string&& name, TcdmBusConnection& slave)
+    constexpr SingleTcdmController(std::string&& name, TcdmMemoryController::Connections&& slave)
             : name_(name), slave_(slave) { }
 
     constexpr SingleTcdmController() = default;
@@ -38,7 +27,7 @@ public:
 private:
 
     std::string name_;
-    TcdmBusConnection slave_;
+    TcdmMemoryController::Connections slave_;
     std::queue<uint32_t> response_queue_;
 
     bool is_stall();
@@ -51,12 +40,24 @@ class TcdmMemoryController
     friend class SingleTcdmController;
     
 public:
-    TcdmMemoryController(std::array<TcdmBusConnection, N>&& tcdmBusConnections)
+
+    struct Connections
+    {
+        bool*     req;
+        bool*     gnt;
+        uint32_t* add;
+        bool*     wen;
+        uint8_t*  be;
+        uint32_t* data;
+        uint32_t* r_data;
+        bool*     r_valid;
+    };
+
+    constexpr TcdmMemoryController(std::array<Connections, N>&& connections, std::string&& name) noexcept
     {
         for (int i = 0; i < N; ++i)
         {
-            std::string name = "TCDM[" + i + "]";
-            tcdm_buses_[i] = SingleTcdmController(std::move(name), tcdmBusConnections[i]);
+            tcdm_buses_[i] = SingleTcdmController(name + "[" + i + "]", std::move(connections[i]));
         }
     }
 
