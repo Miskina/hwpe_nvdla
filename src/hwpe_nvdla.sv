@@ -104,9 +104,10 @@ module hwpe_nvdla #(
 
 
     nvdla dla (
-        .core_clk( clk  ),
-        .csb_clk ( clk  ),
-        .rst_ni  ( !rst ),
+        .core_clk (  clk  ),
+        .csb_clk  (  clk  ),
+        .rst_ni   ( !rst  ),
+	.interrupt( evt_o ),
         .*
     );
 
