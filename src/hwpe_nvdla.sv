@@ -4,10 +4,10 @@
     .tcdm_master_add_o    ( `TCDM_CONCAT(add)     ),   \
     .tcdm_master_type_o   ( `TCDM_CONCAT(wen)     ),   \
     .tcdm_master_be_o     ( `TCDM_CONCAT(be)      ),   \
-    .tcdm_master_data_o   ( `TCDM_CONCAT(data)    ),   \
+    .tcdm_master_data_o   ( `TCDM_CONCAT(wdata)   ),   \
     .tcdm_master_gnt_i    ( `TCDM_CONCAT(gnt)     ),   \
     .tcdm_master_r_valid_i( `TCDM_CONCAT(r_valid) ),   \
-    .tcdm_master_r_data_i ( `TCDM_CONCAT(r_data)  )
+    .tcdm_master_r_data_i ( `TCDM_CONCAT(r_rdata) )
 
 `define AXI_AxSIZE 3'b110
 
@@ -112,19 +112,19 @@ module hwpe_nvdla #(
     );
 
     always_comb begin : periph_connect_comb
-        periph.req  = periph_intf.req;
-        periph.add  = periph_intf.add;
-        periph.wen  = periph_intf.wen;
-        periph.be   = periph_intf.be;
-        periph.data = periph_intf.data;
-        periph.id   = periph_intf.id;
+        periph.req   = periph_intf.req;
+        periph.add   = periph_intf.add;
+        periph.wen   = periph_intf.wen;
+        periph.be    = periph_intf.be;
+        periph.wdata = periph_intf.data;
+        periph.id    = periph_intf.id;
 
         // What is opc???
-        periph.opc = '0;
+        periph.r_opc = '0;
 
         periph_intf.gnt     = periph.gnt;
         periph_intf.r_id    = periph.r_id;
-        periph_intf.r_data  = periph.r_data;
+        periph_intf.r_data  = periph.r_rdata;
         periph_intf.r_valid = periph.r_valid;
         periph_intf.r_id    = periph.r_id;
     end
