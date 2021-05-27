@@ -447,9 +447,9 @@ sources:
 
     target: rtl
     files:
-      - hwpe_ctrl_intf_periph.sv
-      - nvdla_csb_intf.sv
-      - nvdla_dbb_intf.sv
-      - periph_to_csb.sv
-      - nvdla.sv
-      - hwpe_nvdla.sv
+      - intf/hwpe_ctrl_intf_periph.sv
+      - intf/nvdla_csb_intf.sv
+      - intf/nvdla_dbb_intf.sv
+      - src/periph_to_csb.sv
+      - src/nvdla.sv
+      - src/hwpe_nvdla.sv
