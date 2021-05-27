@@ -1,4 +1,4 @@
-`define TCDM_CONCAT(signal) { tcdm[3].``signal``, tcdm[2].``signal``[2], tcdm[1].```signal``[1], tcdm[0].``signal``[0] }
+`define TCDM_CONCAT(signal) { tcdm[3].``signal, tcdm[2].``signal, tcdm[1].``signal, tcdm[0].``signal }
 `define TCDM_TO_AXI2MEM                                \
     .tcdm_master_req_o    ( `TCDM_CONCAT(req)     ),   \
     .tcdm_master_add_o    ( `TCDM_CONCAT(add)     ),   \
