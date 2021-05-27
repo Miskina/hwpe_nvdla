@@ -5,7 +5,7 @@ package:
     - "Mihael Kovač <mihael.kovac@fer.hr>"
 
 dependencies:
-  axi2mem: { git: "https://github.com/pulp-platform/axi2mem.git", version: latest }
+  axi2mem: { git: "https://github.com/pulp-platform/axi2mem.git", rev: master }
 
 sources:
 
