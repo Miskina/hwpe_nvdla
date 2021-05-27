@@ -131,23 +131,23 @@ sources:
       - nvdla_hw/outdir/nv_small/vmod/vlibs/PGAOPV_AN2D2PO4.v
       - nvdla_hw/outdir/nv_small/vmod/vlibs/PGAOPV_DFCNQD2PO4.v
       - nvdla_hw/outdir/nv_small/vmod/vlibs/PGAOPV_INVD2PO4.v
-      - nvdla_hw/outdir/nv_small/vmod/vlibs/RANDFUNC.vlib
+      - nvdla_hw/outdir/nv_small/vmod/vlibs/RANDFUNC.v
       - nvdla_hw/outdir/nv_small/vmod/vlibs/SDFCNQD1.v
       - nvdla_hw/outdir/nv_small/vmod/vlibs/SDFQD1.v
       - nvdla_hw/outdir/nv_small/vmod/vlibs/SDFSNQD1.v
       - nvdla_hw/outdir/nv_small/vmod/vlibs/ScanShareSel_JTAG_reg_ext_cg.v
       - nvdla_hw/outdir/nv_small/vmod/vlibs/assertion_header.vh
       - nvdla_hw/outdir/nv_small/vmod/vlibs/assertion_task.vh
-      - nvdla_hw/outdir/nv_small/vmod/vlibs/no_lib_cells.vlib
-      - nvdla_hw/outdir/nv_small/vmod/vlibs/nv_assert_always.vlib
-      - nvdla_hw/outdir/nv_small/vmod/vlibs/nv_assert_at_time_interval.vlib
-      - nvdla_hw/outdir/nv_small/vmod/vlibs/nv_assert_fifo.vlib
-      - nvdla_hw/outdir/nv_small/vmod/vlibs/nv_assert_hold_throughout_event_interval.vlib
-      - nvdla_hw/outdir/nv_small/vmod/vlibs/nv_assert_never.vlib
-      - nvdla_hw/outdir/nv_small/vmod/vlibs/nv_assert_no_x.vlib
-      - nvdla_hw/outdir/nv_small/vmod/vlibs/nv_assert_one_hot.vlib
-      - nvdla_hw/outdir/nv_small/vmod/vlibs/nv_assert_vld_credit_max.vlib
-      - nvdla_hw/outdir/nv_small/vmod/vlibs/nv_assert_zero_one_hot.vlib
+      - nvdla_hw/outdir/nv_small/vmod/vlibs/no_lib_cells.v
+      - nvdla_hw/outdir/nv_small/vmod/vlibs/nv_assert_always.v
+      - nvdla_hw/outdir/nv_small/vmod/vlibs/nv_assert_at_time_interval.v
+      - nvdla_hw/outdir/nv_small/vmod/vlibs/nv_assert_fifo.v
+      - nvdla_hw/outdir/nv_small/vmod/vlibs/nv_assert_hold_throughout_event_interval.v
+      - nvdla_hw/outdir/nv_small/vmod/vlibs/nv_assert_never.v
+      - nvdla_hw/outdir/nv_small/vmod/vlibs/nv_assert_no_x.v
+      - nvdla_hw/outdir/nv_small/vmod/vlibs/nv_assert_one_hot.v
+      - nvdla_hw/outdir/nv_small/vmod/vlibs/nv_assert_vld_credit_max.v
+      - nvdla_hw/outdir/nv_small/vmod/vlibs/nv_assert_zero_one_hot.v
       - nvdla_hw/outdir/nv_small/vmod/vlibs/oneHotClk_async_read_clock.v
       - nvdla_hw/outdir/nv_small/vmod/vlibs/oneHotClk_async_write_clock.v
       - nvdla_hw/outdir/nv_small/vmod/vlibs/p_SDFCNQD1PO4.v
