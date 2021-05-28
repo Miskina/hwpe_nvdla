@@ -112,21 +112,21 @@ module hwpe_nvdla #(
     );
 
     always_comb begin : periph_connect_comb
-        periph.req   = periph_intf.req;
-        periph.add   = periph_intf.add;
-        periph.wen   = periph_intf.wen;
-        periph.be    = periph_intf.be;
-        periph.wdata = periph_intf.data;
-        periph.id    = periph_intf.id;
+        periph_intf.req   = periph.req;
+        periph_intf.add   = periph.add;
+        periph_intf.wen   = periph.wen;
+        periph_intf.be    = periph.be;
+        periph_intf.wdata = periph.data;
+        periph_intf.id    = periph.id;
 
         // What is opc???
         periph.r_opc = '0;
 
-        periph_intf.gnt     = periph.gnt;
-        periph_intf.r_id    = periph.r_id;
-        periph_intf.r_data  = periph.r_rdata;
-        periph_intf.r_valid = periph.r_valid;
-        periph_intf.r_id    = periph.r_id;
+        periph.gnt     = periph_intf.gnt;
+        periph.r_id    = periph_intf.r_id;
+        periph.r_data  = periph_intf.r_rdata;
+        periph.r_valid = periph_intf.r_valid;
+        periph.r_id    = periph_intf.r_id;
     end
 
 endmodule // hwpe_nvdla
