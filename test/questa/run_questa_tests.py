@@ -334,7 +334,7 @@ for i, filename in enumerate(test_it(tests), start=1):
                   cwd=test_folder,
                   stdout=sp.PIPE,
                   stderr=sp.PIPE,
-                  text=True) as build_proc:
+                  universal_newlines=True) as build_proc:
 
         for out, err in read_pipes(build_proc): 
             if out:
@@ -373,7 +373,7 @@ for i, filename in enumerate(test_it(tests), start=1):
                   stdout=sp.PIPE,
                   stderr=sp.PIPE,
                   cwd=test_folder,
-                  text=True) as p:
+                  universal_newlines=True) as p:
 
         def on_timeout():
             log.debug('Test timed out!')
