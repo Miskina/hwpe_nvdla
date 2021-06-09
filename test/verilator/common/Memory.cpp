@@ -9,4 +9,3 @@ size_t Memory::block_size() const noexcept
 {
     return block_size_;
 }
-

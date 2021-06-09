@@ -22,7 +22,7 @@ public:
     }
 
     template<typename DataType, typename AddressType>
-    DataType read(AddressType address) const noexcept
+    DataType read(const AddressType address) const noexcept
     {
         static_assert(std::is_integral<AddressType>::value,
                       "AddressType must be an integral type!");
@@ -52,7 +52,7 @@ public:
     }
 
     template<typename AddressType, typename DataType>
-    void write(AddressType address, DataType data) noexcept
+    void write(const AddressType address, DataType data) noexcept
     {
         static_assert(std::is_integral<DataType>::value,
                       "The DataType must be an integral type!");

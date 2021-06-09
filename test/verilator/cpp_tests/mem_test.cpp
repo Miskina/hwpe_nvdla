@@ -4,10 +4,10 @@
 #include <cassert>
 #include <type_traits>
 
-template <size_t BlockSize, typename DataGenerator, typename AddressGenerator>
+template <typename DataGenerator, typename AddressGenerator>
 bool test(const char* test_name,
           int iterations,
-          Memory<BlockSize>& mem,
+          Memory& mem,
           DataGenerator data_gen,
           AddressGenerator address_gen)
 {
