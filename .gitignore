@@ -1,1 +1,5 @@
 .vscode
+.bender
+Bender.lock
+Bender.local
+dependencies

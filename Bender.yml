@@ -5,7 +5,13 @@ package:
     - "Mihael Kovač <mihael.kovac@fer.hr>"
 
 dependencies:
+  axi: { git: "https://github.com/pulp-platform/axi.git", rev: master }
   axi2mem: { git: "https://github.com/pulp-platform/axi2mem.git", rev: master }
+
+workspace:
+  package_links:
+    dependencies/axi2mem: axi2mem
+    dependencies/axi: axi
 
 sources:
 
@@ -600,7 +606,7 @@ sources:
 
     defines:
 
-    target: rtl
+    target: any(rtl, fpga)
     files:
       - intf/hwpe_ctrl_intf_periph.sv
       - intf/nvdla_csb_intf.sv
@@ -608,3 +614,7 @@ sources:
       - src/periph_to_csb.sv
       - src/nvdla.sv
       - src/hwpe_nvdla.sv
+      - src/axi_intf.sv
+
+plugins:
+  verilator_dependencies: gen_verilator_dependencies.sh
