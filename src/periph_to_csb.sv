@@ -45,12 +45,10 @@ always_comb begin
     unique case (current_state)
         IDLE: begin
             csb.valid = periph.req;
-            if (periph.req && csb.ready) begin
-
+            if (csb.valid && csb.ready) begin
+	    	next_state = WAITING_RESPONSE;
                 if ((csb.write && csb.wr_complete) || (!csb.write && csb.r_valid)) begin
                     next_state = GRANT_REQUEST;
-                end else begin
-                    next_state = WAITING_RESPONSE;
                 end
             end 
         end
@@ -71,7 +69,7 @@ always_comb begin
 end
 
 always_comb begin
-    csb.addr  =  periph.add[15:0];
+    csb.addr  =  {2'b00, periph.add[15:2]};
     csb.wdat  =  periph.data;
     csb.write = ~periph.wen;
     csb.nposted = '1; // Always request a write response

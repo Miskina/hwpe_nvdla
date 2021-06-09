@@ -3,3 +3,6 @@
 Bender.lock
 Bender.local
 dependencies
+build
+*.log
+.run_questa_tests_cache
