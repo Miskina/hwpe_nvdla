@@ -22,7 +22,10 @@ PeriphController::PeriphController(PeriphController::Connections&& connections, 
 void PeriphController::submit_operation(const ControlOperation& op, ControlOperationResponse&& response)
 {
     *connections_.req  = 1;
-    *connections_.add  = op.addr;
+    // We have to shift because NVDLA trace parser generates trace.bin files
+    // with already shifted addresses -> which then get shifted again in the periph_to_csb
+    // SystemVerilog bridge module.
+    *connections_.add  = op.addr << 2;
     *connections_.wen  = op.wen;
     *connections_.be   = op.be;
     *connections_.data = op.data;
