@@ -1,0 +1,9 @@
+axi2mem:
+  commit: 6973e0434d26ba578cdb4aa69c26c1facd1a3f15
+  server: https://github.com
+  group: pulp-platform
+
+axi:
+  commit: f847575bab7269f88f6caa36f01275de2007378a
+  server: https://github.com
+  group: pulp-platform

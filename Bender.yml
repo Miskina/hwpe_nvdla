@@ -93,7 +93,7 @@ sources:
       PRAND_OFF: ~
       # FIFOGEN_MASTER_CLK_GATING_DISABLED: ~
     
-    target: any(nvdla, rtl)
+    target: rtl
 
     files:
       - nvdla_hw/outdir/nv_small/vmod/rams/model/RAMDP_128X11_GL_M2_E2.v
@@ -606,7 +606,7 @@ sources:
 
     defines:
 
-    target: any(rtl, fpga)
+    target: rtl
     files:
       - intf/hwpe_ctrl_intf_periph.sv
       - intf/nvdla_csb_intf.sv
@@ -617,4 +617,4 @@ sources:
       - src/axi_intf.sv
 
 plugins:
-  verilator_dependencies: gen_verilator_dependencies.sh
+  verilator_setup: verilator_setup.sh
