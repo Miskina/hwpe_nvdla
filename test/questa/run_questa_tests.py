@@ -245,7 +245,8 @@ def get_test_list(log, args):
                 
 def test_it(test_list: list):
     while(test_list):
-        yield test_list.pop(0)
+	yield test_list[0]
+	test_list.pop(0)
 
 
 common = ArgumentParser(add_help=False)
