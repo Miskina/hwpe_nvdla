@@ -10,17 +10,19 @@ if (NOT verilator_FOUND)
 endif()
 
 # SystemC dependencies
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
+# set(THREADS_PREFER_PTHREAD_FLAG ON)
+# find_package(Threads REQUIRED)
 
 # Find SystemC using SystemC's CMake integration
 # find_package(SystemCLanguage QUIET)
 add_executable(periph_to_csb_sim sim_periph_to_csb.cpp)
 
 
-target_compile_definitions(periph_to_csb_sim PUBLIC VM_SC=1 VM_TRACE=1)
+# target_compile_definitions(periph_to_csb_sim PUBLIC VM_SC=1 VM_TRACE=1)
+target_compile_definitions(periph_to_csb_sim PUBLIC VM_TRACE=1)
 
-target_include_directories(periph_to_csb_sim PRIVATE include/common include/sc)
+# target_include_directories(periph_to_csb_sim PRIVATE ../common/cc ../common)
+target_include_directories(periph_to_csb_sim PRIVATE ../common/sc ../common)
 
 # add_library(Vperiph_to_csb_lib OBJECT)
 add_library(Vcsb_slave_lib     STATIC)
@@ -31,9 +33,9 @@ add_library(Vcsb_slave_lib     STATIC)
 target_link_libraries(periph_to_csb_sim PRIVATE Vcsb_slave_lib)
 
 verilate(Vcsb_slave_lib TRACE SYSTEMC
-    INCLUDE_DIRS "../test"
+    INCLUDE_DIRS "../../src"
     VERILATOR_ARGS -Os -x-assign 0 -Wno-UNOPTFLAT -Wno-UNUSED
-    SOURCES ../test/csb_slave.sv)
+    SOURCES ../../src/csb_slave.sv)
 
 
 add_dependencies(periph_to_csb_sim Vcsb_slave_lib)
@@ -44,11 +46,11 @@ add_dependencies(periph_to_csb_sim Vcsb_slave_lib)
 verilate(periph_to_csb_sim TRACE SYSTEMC
     INCLUDE_DIRS "../src ../test ../intf"
     VERILATOR_ARGS -Os -x-assign 0 -Wno-UNOPTFLAT -Wno-UNUSED --exe
-    SOURCES ../test/periph_to_csb_wrapper.sv
-            ../src/periph_to_csb.sv
-            ../intf/hwpe_ctrl_intf_periph.sv
-            ../intf/nvdla_csb_intf.sv
-            ../intf/nvdla_dbb_intf.sv)
+    SOURCES ../../src/periph_to_csb_wrapper.sv
+            ../../../src/periph_to_csb.sv
+            ../../../intf/hwpe_ctrl_intf_periph.sv
+            ../../../intf/nvdla_csb_intf.sv
+            ../../../intf/nvdla_dbb_intf.sv)
 
 
-verilator_link_systemc(periph_to_csb_sim)
+# verilator_link_systemc(periph_to_csb_sim)

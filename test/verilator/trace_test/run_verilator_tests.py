@@ -20,7 +20,8 @@ FAILED_CACHE = os.path.join(CACHE_DIR, 'failed')
 ALL_CACHE = os.path.join(CACHE_DIR, 'all')
 ERROR_PATTERN = 'error\s+(\d+)'
 
-
+# Unfortunately hardcoded for now
+TB_BIN_DIR = '../bin'
 
 class TerminalColors:
     HEADER = '\033[95m'
@@ -305,9 +306,10 @@ for i, filename in enumerate(tests, start=1):
     make_error = None
     return_code = 0
 
-    testbenches_root = '../'
-    simulation = os.path.join(testbenches_root, testbench, 'build', testbench)
-    sim_args = [simulation, test]
+    testbench_path = os.path.join(TB_BIN_DIR, testbench)
+    # testbenches_root = '../'
+    # simulation = os.path.join(testbenches_root, testbench, 'build', testbench)
+    sim_args = [testbench_path, test]
     if vcd_trace_dir:
         trace_loc = os.path.join(vcd_trace_dir, filename + '.vcd')
         sim_args.append(trace_loc)

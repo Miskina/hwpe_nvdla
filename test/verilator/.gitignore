@@ -1,7 +1,10 @@
 obj_dir
 build
+bin
+lib
+arch
 logs
 .run_verilator_tests_cache
 CMakeFiles
 *.vcd
-verilator.f
+verilator*.f

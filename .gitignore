@@ -7,3 +7,4 @@ build
 *.log
 .run_questa_tests_cache
 .cached*
+ipstools

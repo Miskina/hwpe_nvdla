@@ -16,7 +16,7 @@ if (DEFINED $ENV{HWPE_NVDLA_ROOT})
   set(HWPE_NVDLA_ROOT_DIR $ENV{HWPE_NVDLA_ROOT})
 else()
   get_filename_component(HWPE_NVDLA_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
-endif(NOT $ENV{HWPE_NVDLA_ROOT})
+endif(DEFINED $ENV{HWPE_NVDLA_ROOT})
 
 set(HWPE_NVDLA_SUBMODULE ${HWPE_NVDLA_ROOT_DIR}/nvdla_hw)
 set(HWPE_NVDLA_SUBMODULE_VMOD ${HWPE_NVDLA_SUBMODULE}/vmod)
@@ -30,6 +30,7 @@ set(HWPE_NVDLA_DEPENDENCIES_DIR ${HWPE_NVDLA_ROOT_DIR}/dependencies)
 set(HWPE_NVDLA_AXI2MEM_DIR ${HWPE_NVDLA_DEPENDENCIES_DIR}/axi2mem)
 set(HWPE_NVDLA_AXI_DIR ${HWPE_NVDLA_DEPENDENCIES_DIR}/axi)
 set(HWPE_NVDLA_VERILATOR_FILE ${HWPE_NVDLA_VERILATOR_DIR}/verilator.f)
+set(HWPE_NVDLA_SMALL_VERILATOR_FILE ${HWPE_NVDLA_VERILATOR_DIR}/verilator_nv_small.f)
 
 if(HWPE_NVDLA_USE_SYSTEMC)
     set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -40,7 +41,7 @@ else()
     set(HWPE_NVDLA_VERILATOR_COMMON_DIR ${HWPE_NVDLA_VERILATOR_COMMON_DIR_BASE}/cc) 
 endif(HWPE_NVDLA_USE_SYSTEMC)
 
-file(GLOB HWPE_NVDLA_ALL_SOURCES    "${HWPE_NVDLA_SRC_DIR}/*.sv")
+file(GLOB HWPE_NVDLA_ALL_SOURCES    "${HWPE_NVDLA_SOURCE_DIR}/*.sv")
 file(GLOB HWPE_NVDLA_ALL_INTERFACES "${HWPE_NVDLA_INTF_DIR}/*.sv")
 
 message(STATUS "NVDLA project folder at: ${HWPE_NVDLA_SUBMODULE}")
@@ -65,3 +66,36 @@ add_custom_target(nvdla_trace_tests
                   DEPENDS ${NVDLA_TRACE_TESTS})
 
 # file(GLOB HWPE_NVDLA_AXI2MEM_SRC_FILES "${HWPE_NVDLA_AXI2MEM_DIR/*.sv")
+# add_custom_command(COMMAND ./${PROJECT_NAME}
+#                    WORKING_DIRECTORY ${CMAKE_PROJECT_DIR}
+#                    DEPENDS ${PROJECT_NAME}
+# )
+
+# function(add_run_script TARGET_NAME)
+    #    get_target_property(_EXECUTABLE_NAME ${TARGET_NAME} LOCATION)
+    #    set(_EXECUTABLE_NAME $<TARGET_FILE:${TARGET_NAME}>)
+    #    get_property(_EXECUTABLE_NAME TARGET ${TARGET_NAME} PROPERTY LOCATION)
+    #    configure_file(${HWPE_NVDLA_VERILATOR_DIR}/templates/run.sh.in ${CMAKE_CURRENT_BINARY_DIR}/run.sh @ONLY)
+    #    file(GENERATE OUTPUT ${CMAKE_BINARY_DIR}/run.sh CONTENT "!#/bin/bash\n\n$<TARGET_FILE:${TARGET_NAME}> \"@\"") 
+    #    add_custom_command(TARGET ${TARGET_NAME}
+    #                       POST_BUILD
+    #                       DEPENDS ${CMAKE_BINARY_DIR}/run.sh
+    #                       COMMAND echo "GENERATING run for $<TARGET_FILE:${TARGET_NAME}>" & chmod +x ${CMAKE_BINARY_DIR}/run.sh
+    #                       VERBATIM
+    #    )
+#     add_custom_target(run_script chmod +x ${CMAKE_CURRENT_BINARY_DIR}/run.sh
+#                       DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/run.sh)
+#     add_dependencies(run_script ${PROJECT_NAME})
+    
+    #     file(WRITE ${CMAKE_PROJECT_DIR}/run_simulation.cmake
+    #         "cmake_minimum_required(VERSION 3.8)\n\noption(ARGS \"Arguments passed to the program\" \"\")\n\nexecute_process(COMMAND $<TARGET_FILE:${PROJECT_NAME}> ${ARGS} WORKING_DIRECTORY ${CMAKE_PROJECT_DIR}"
+    #         TARGET ${PROJECT_NAME}
+    #     )
+#    add_custom_target(run
+#        COMMAND ${PROJECT_NAME} $(RUN_ARGS)
+#        DEPENDS ${PROJECT_NAME}
+#        WORKING_DIRECTORY ${CMAKE_PROJECT_DIR}
+#    )
+# endfunction(add_run_script) 
+
+# add_run_target()

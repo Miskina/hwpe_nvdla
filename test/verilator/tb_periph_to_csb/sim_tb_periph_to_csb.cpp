@@ -11,10 +11,11 @@
 #define READ 1
 #define WRITE 0
 
-#define tick(top) do{ \
+#define tick(top, vcd) do{ \
     top->clk = !top->clk; \
-    Verilated::timeInc(1); \
     top->eval(); \
+    Verilated::timeInc(1); \
+    vcd->dump(Verilated::time()); \
     } while(0)
 
 int main(int argc, char** argv, char** env)
@@ -74,8 +75,8 @@ int main(int argc, char** argv, char** env)
 
         periphMaster.eval();
         top->eval();
-        tick(top);
-        tick(top);
+        tick(top, vcd_dump);
+        tick(top, vcd_dump);
     }
 
 	top->final();	
