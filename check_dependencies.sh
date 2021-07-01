@@ -10,9 +10,14 @@ exists() {
 }
 
 exists verilator 
-exists python3
+exists python
 exists bender
+exists gcc
+exists g++
+exists make
+exists cpp
 exists cmake
+exists java
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 

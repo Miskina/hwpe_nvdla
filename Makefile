@@ -62,8 +62,25 @@ clean_pulp_rt:
 	@echo "Cleaning PULP Runtime example dependencies"
 	make -C test/pulprt/nvdla clean
 
-clean: $(CLEAN_ALL)
+clean_all: ${CLEAN_ALL}
+
+clean: clean_all 
 
 all: $(ALL)
 
 default: all
+
+help:
+	@echo ""
+	@echo "Call 'make <target>' with one of the targets:"
+	@echo " - check_dependencies - Checks if you have all of the required dependencies installed. Called automatically."
+	@echo " - init_submodules    - Initializes git submodules (NVDLA submodule)."
+	@echo " - update_submodules  - Updates the git submodules."
+	@echo " - nvdla              - Generates required files for NVDLA and generates NVDLA Verilog code."
+	@echo " - bender             - Uses the Bender tool to update dependencies."
+	@echo " - ips                - Uses the IPApprox tool to update dependencies - Not used in the 'all' rule, overwrites the bender ones and can break Verilator testbenches."
+	@echo " - pulp_rt            - Generates required dependencies (header files) for PULP Runtime examples."
+	@echo " - verilator          - Generates files required in Verilator testbenches and builds the testbenches."
+	@echo " - all                - Run all of the above except for the 'ips' target."
+	@echo " - clean_<target>     - Cleans the specified <target>."
+	@echo " - clean              - Clean all targets."
