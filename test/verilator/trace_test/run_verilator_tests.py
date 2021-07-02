@@ -10,6 +10,7 @@ from queue import Queue, Empty
 from concurrent.futures import ThreadPoolExecutor
 from collections import defaultdict
 from enum import IntEnum
+import signal
 
 CACHE_DIR = '.run_verilator_tests_cache'
 # LOG_FILE_NAME = 'tests.log'
@@ -18,8 +19,9 @@ LOG_FORMAT = '{} - {}'
 LOG_DATE_FORMAT = '%d-%m-%Y %H:%M:%S'
 FAILED_CACHE = os.path.join(CACHE_DIR, 'failed')
 ALL_CACHE = os.path.join(CACHE_DIR, 'all')
-ERROR_PATTERN = 'error\s+(\d+)'
+REMAINING_CACHE = os.path.join(CACHE_DIR, 'remaining')
 
+ERROR_PATTERN = 'error\s+(\d+)'
 # Unfortunately hardcoded for now
 TB_BIN_DIR = '../bin'
 
@@ -38,22 +40,33 @@ class RunCache:
 
     def __init__(self, args):
         if args.no_cache:
-            self.cache_test = lambda testname: None
+            self.cache_all = lambda testnames: None
             self.cache_failed_test = lambda testname: None
+            self.cache_remaining = lambda test_names: None
             self.close = lambda: None
         else:
             os.makedirs(CACHE_DIR, exist_ok=True)
             self.all_cache = open(ALL_CACHE, 'w')
             self.failed_cache = open(FAILED_CACHE, 'w')
-            self.cache_test = lambda testname : print(testname, file=self.all_cache)
+            self.remaining_cache = open(REMAINING_CACHE, 'w')
             self.cache_failed_test = lambda testname : print(testname, file=self.failed_cache)
-            self._files = [self.all_cache, self.failed_cache]
+            self._files = [self.all_cache, self.failed_cache, self.remaining_cache]
             
             def _close():
-                self.all_cache.close()
-                self.failed_cache.close()
+                for f in self._files:
+                    f.close()
             
-            self.close = lambda: _close()
+            self.close = _close
+
+            def _cache_all(test_names: list):
+                for test_name in test_names:
+                    print(test_name.strip(), file=self.all_cache)
+            self.cache_all = _cache_all
+
+            def _cache_remaining(test_names: list):
+                for test_name in test_names:
+                    print(test_name.strip(), file=self.remaining_cache)
+            self.cache_remaining = _cache_remaining
 
 class LogLevel(IntEnum):
     INFO  = 1
@@ -194,6 +207,14 @@ def read_pipes(p):
             yield (out, err)
 
 
+def signal_handler_factory(trace_names: list, cache: RunCache):
+    def _handler(sig, frame):
+        cache.cache_remaining(trace_names)
+        cache.close()
+        sys.exit(0)
+
+    return _handler
+
 def get_test_list(log, args):
     test_list_file = ''
     if args.command == 'list':
@@ -202,9 +223,11 @@ def get_test_list(log, args):
         test_list_file = 'test_lists/all_tests.txt'
     elif args.command == 'last_run' or args.command == 'last':
         if args.failed:
-            test_list_file = os.path.join(CACHE_DIR, 'failed')
+            test_list_file = FAILED_CACHE
+        elif args.remaining:
+            test_list_file = REMAINING_CACHE
         else:
-            test_list_file = os.path.join(CACHE_DIR, 'all')
+            test_list_file = ALL_CACHE
         
         if not os.path.exists(test_list_file):
             log.info('No run cached -- cannot use the "last/last_run" option')
@@ -215,6 +238,10 @@ def get_test_list(log, args):
 
     return test_list_file, test_list
                 
+def test_it(test_list: list):
+    while(test_list):
+        yield test_list[0]
+        test_list.pop(0)
 
 
 common = ArgumentParser(add_help=False)
@@ -236,6 +263,8 @@ common.add_argument('-r', '--nvdla_root',
 
 common.add_argument('--no-cache',
                     action='store_true',
+                    default=False,
+                    dest='no_cache',
                     help='Do not save this run (will not be used when using the "last_run" command)')
 
 common.add_argument('testbench',
@@ -263,6 +292,7 @@ last_run_parser = subparsers.add_parser('last_run',
                                         description='Run tests ran in the last run of the script',
                                         parents=[common])
 last_run_parser.add_argument('--failed', action='store_true', help='Run only the tests that failed last time')
+last_run_parser.add_argument('--remaining', action='store_true', help='Run the tests which should have been run, but the program was interrupted')
 
 parser.epilog = "--- Arguments common to all commands ---" + common.format_help().replace(common.format_usage(), '')
 
@@ -277,6 +307,11 @@ nvdla_root    = os.path.abspath(args.nvdla_root)
 verilator_dir = os.path.join(nvdla_root, 'verif', 'verilator')
 
 test_list, tests = get_test_list(log, args)
+cache = RunCache(args)
+
+signal_handler = signal_handler_factory(tests, cache)
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
 
 log.debug('Running tests from test list: {} ({})'.format(test_list, os.path.abspath(test_list)))
 
@@ -285,15 +320,15 @@ failed_tests     = []
 make_error_dict  = defaultdict(list)
 return_code_dict = defaultdict(list)
 
-cache = RunCache(args)
 
 vcd_trace_dir = None
 if args.vcd:
     vcd_trace_dir = os.path.join(args.vcd, testbench)
     os.makedirs(vcd_trace_dir, exist_ok=True)
 
+cache.cache_all(tests)
 
-for i, filename in enumerate(tests, start=1):
+for i, filename in enumerate(test_it(tests), start=1):
     filename = filename.strip()
     test = os.path.join(nvdla_root, 'outdir', 'nv_small', 'verilator', 'test', filename, 'trace.bin')
     
@@ -354,8 +389,6 @@ for i, filename in enumerate(tests, start=1):
     elif test_failed_rc:
         return_code_dict[return_code].append(filename)
     
-    cache.cache_test(filename)
-
     log.remove_logfile(filename)
 
 

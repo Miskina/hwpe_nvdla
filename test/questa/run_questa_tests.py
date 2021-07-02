@@ -54,13 +54,13 @@ class RunCache:
             self.remaining_cache = open(REMAINING_CACHE, 'w')
             self.cache_test = lambda testname : print(testname, file=self.all_cache)
             self.cache_failed_test = lambda testname : print(testname, file=self.failed_cache)
-            self._files = [self.all_cache, self.failed_cache]
+            self._files = [self.all_cache, self.failed_cache, self.remaining_cache]
             
             def _close():
-                self.all_cache.close()
-                self.failed_cache.close()
+                for f in self._files:
+                    f.close()
             
-            self.close = lambda: _close()
+            self.close = _close
 
             def _cache_remaining(test_names: list):
                 for test_name in test_names:
@@ -212,6 +212,7 @@ def read_pipes(p):
 def signal_handler_factory(trace_names: list, cache: RunCache):
     def _handler(sig, frame):
         cache.cache_remaining(trace_names)
+        cache.close()
         sys.exit(0)
 
     return _handler
@@ -245,8 +246,8 @@ def get_test_list(log, args):
                 
 def test_it(test_list: list):
     while(test_list):
-	yield test_list[0]
-	test_list.pop(0)
+        yield test_list[0]
+        test_list.pop(0)
 
 
 common = ArgumentParser(add_help=False)
@@ -300,12 +301,12 @@ parser.epilog = "--- Arguments common to all commands ---" + common.format_help(
 args = parser.parse_args()
 
 log = Log(args)
-cache = RunCache(args)
 timeout = args.timeout * 60 if args.timeout else TEST_TIMEOUT_SEC
 
 test_folder = args.test_folder 
 
 test_list, tests = get_test_list(log, args)
+cache = RunCache(args)
 
 signal_handler = signal_handler_factory(tests, cache)
 signal.signal(signal.SIGINT, signal_handler)
