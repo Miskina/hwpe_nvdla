@@ -25,6 +25,12 @@ tested appropriately and is not recommended. The make rules currently use Bender
 
 Bender can be installed by following the instructions at it's [github repository](https://github.com/pulp-platform/bender#installation).
 
+### The problem with Bender
+Since currently Bender is still relatively new, it can hang. Specifically, if your SSH key for Github requires a password Bender is extremely likely to hang
+after inputting the password. In this case just wait a minute or two, stop the currently running program (Ctrl + C) and rerun the *make* or *Bender*
+command. This also unfortunately means that after running *make* you will sometimes have to wait for *Bender* to ask for the SSH key passphrase, but
+after that the rest of the build system should be automated. 
+
 ## Components of the repository
 The repository consists a couple of subfolders each serving a different purpose. The
 folders and subfolders will be described further in the following chapters.
