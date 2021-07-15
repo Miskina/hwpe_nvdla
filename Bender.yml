@@ -627,7 +627,6 @@ sources:
       - src/periph_to_csb.sv
       - src/nvdla.sv
       - src/hwpe_nvdla.sv
-      - src/axi_intf.sv
 
   - include_dirs:
       - nvdla_hw/vmod/rams/fpga/small_rams
