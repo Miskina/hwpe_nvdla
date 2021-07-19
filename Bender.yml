@@ -17,7 +17,7 @@ sources:
   - include_dirs:
     - nvdla_hw/vmod/rams/synth
 
-    target: rtl
+    target: synthesis
     
     files:
       - nvdla_hw/outdir/nv_small/vmod/rams/synth/nv_ram_rws_128x18.v
@@ -120,6 +120,7 @@ sources:
       - nvdla_hw/outdir/nv_small/vmod/rams/synth/nv_ram_rwsthp_80x72_logic.v
       - nvdla_hw/outdir/nv_small/vmod/rams/synth/nv_ram_rwsthp_80x9.v
       - nvdla_hw/outdir/nv_small/vmod/rams/synth/nv_ram_rwsthp_80x9_logic.v
+      - nvdla_hw/outdir/nv_small/vmod/vlibs/RANDFUNC.v
 
 
   - include_dirs:
@@ -200,7 +201,7 @@ sources:
       PRAND_OFF: ~
       # FIFOGEN_MASTER_CLK_GATING_DISABLED: ~
     
-    target: rtl
+    target: any(rtl,fpga,synthesis)
 
     files:
       - nvdla_hw/outdir/nv_small/vmod/rams/model/RAMDP_128X11_GL_M2_E2.v
@@ -299,7 +300,6 @@ sources:
       - nvdla_hw/outdir/nv_small/vmod/vlibs/PGAOPV_AN2D2PO4.v
       - nvdla_hw/outdir/nv_small/vmod/vlibs/PGAOPV_DFCNQD2PO4.v
       - nvdla_hw/outdir/nv_small/vmod/vlibs/PGAOPV_INVD2PO4.v
-      - nvdla_hw/outdir/nv_small/vmod/vlibs/RANDFUNC.v
       - nvdla_hw/outdir/nv_small/vmod/vlibs/SDFCNQD1.v
       - nvdla_hw/outdir/nv_small/vmod/vlibs/SDFQD1.v
       - nvdla_hw/outdir/nv_small/vmod/vlibs/SDFSNQD1.v
@@ -611,15 +611,15 @@ sources:
     - intf
     - src
 
-    defines:
-      VLIB_BYPASS_POWER_CG: ~
-      NV_FPGA_FIFOGEN: ~
-      FIFOGEN_MASTER_CLK_GATING_DISABLED: ~
-      SYNTHESIS: ~
-      RAM_DISABLED_POWER_GATING_FPGA: ~
-      DISABLE_TESTPOINTS: ~
+      # defines:
+      #   VLIB_BYPASS_POWER_CG: ~
+      #   NV_FPGA_FIFOGEN: ~
+      #   FIFOGEN_MASTER_CLK_GATING_DISABLED: ~
+      #   SYNTHESIS: ~
+      #   RAM_DISABLED_POWER_GATING_FPGA: ~
+      #   DISABLE_TESTPOINTS: ~
 
-    target: any(rtl,fpga)
+    target: any(rtl,fpga,synthesis)
     files:
       - intf/hwpe_ctrl_intf_periph.sv
       - intf/nvdla_csb_intf.sv
@@ -632,57 +632,63 @@ sources:
       - nvdla_hw/vmod/rams/fpga/small_rams
 
     defines:
+      VLIB_BYPASS_POWER_CG: ~
+      NV_FPGA_FIFOGEN: ~
+      FIFOGEN_MASTER_CLK_GATING_DISABLED: ~
+      SYNTHESIS: ~
+      RAM_DISABLED_POWER_GATING_FPGA: ~
+      DISABLE_TESTPOINTS: ~
 
     target: fpga
     files:
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_128x18.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_128x256.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_128x64.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_16x256.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_16x272.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_16x64.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_256x3.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_256x512.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_256x64.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_256x7.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_32x16.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_32x512.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_32x544.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_32x768.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_512x256.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_512x512.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_512x64.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_64x10.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_64x1024.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_64x1088.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_64x116.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_64x18.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_128x11.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_128x6.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_160x16.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_160x514.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_160x65.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_20x289.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_245x514.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_256x11.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_32x32.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_61x514.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_61x64.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_61x65.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_80x14.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_80x16.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_80x256.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_80x514.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_80x65.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_8x65.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwst_256x8.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsthp_19x32.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsthp_19x4.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsthp_19x80.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsthp_60x168.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsthp_60x21.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsthp_80x15.v,
-      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsthp_80x72.v,
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_128x18.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_128x256.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_128x64.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_16x256.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_16x272.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_16x64.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_256x3.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_256x512.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_256x64.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_256x7.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_32x16.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_32x512.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_32x544.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_32x768.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_512x256.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_512x512.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_512x64.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_64x10.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_64x1024.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_64x1088.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_64x116.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_64x18.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_128x11.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_128x6.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_160x16.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_160x514.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_160x65.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_20x289.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_245x514.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_256x11.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_32x32.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_61x514.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_61x64.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_61x65.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_80x14.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_80x16.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_80x256.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_80x514.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_80x65.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsp_8x65.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwst_256x8.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsthp_19x32.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsthp_19x4.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsthp_19x80.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsthp_60x168.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsthp_60x21.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsthp_80x15.v
+      - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsthp_80x72.v
       - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rwsthp_80x9.v
 
 
