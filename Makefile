@@ -19,7 +19,12 @@ nvdla: update_submodules
 	@echo "Generating tree.make for NVDLA"
 	make -C ./nvdla_hw USE_NV_ENV=1
 	@echo "Building Verilog sources for NVDLA"
-	cd nvdla_hw; ./tools/bin/tmake -build vmod
+	if ! command -v docker-compose &> /dev/null
+	then
+		cd nvdla_hw; ./tools/bin/tmake -build vmod
+	else
+		docker-compose up nvdla-build
+	fi
 
 bender: check_dependencies
 	@echo "Fetching bender dependencies"
