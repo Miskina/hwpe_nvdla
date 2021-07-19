@@ -3,6 +3,8 @@
 ALL := check_dependencies init_submodules update_submodules nvdla bender verilator pulp_rt
 CLEAN_ALL = $(addprefix clean_,nvdla bender verilator pulp_rt)
 
+DOCKER ?= 1
+
 check_dependencies:
 	@echo "Checking if you have the required dependencies installed"
 	./check_dependencies.sh
@@ -15,16 +17,18 @@ init_submodules: .gitmodules
 update_submodules: init_submodules
 	git submodule update
 
+ifeq (1, $(DOCKER))
+nvdla: update_submodules
+	@echo "Generating tree.make for NVDLA"
+	@echo "Building Verilog source for NVDLA"
+	docker-compose up nvdla-build
+else
 nvdla: update_submodules
 	@echo "Generating tree.make for NVDLA"
 	make -C ./nvdla_hw USE_NV_ENV=1
 	@echo "Building Verilog sources for NVDLA"
-	if ! command -v docker-compose &> /dev/null
-	then
-		cd nvdla_hw; ./tools/bin/tmake -build vmod
-	else
-		docker-compose up nvdla-build
-	fi
+	cd nvdla_hw; ./tools/bin/tmake -build vmod
+endif
 
 bender: check_dependencies
 	@echo "Fetching bender dependencies"
