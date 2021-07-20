@@ -82,4 +82,5 @@ NV_SMALL_VERILATOR_CONFIG="
 
 
 echo "$NV_SMALL_VERILATOR_CONFIG" > $SCRIPT_DIR/test/verilator/verilator_nv_small.f
-bender script verilator > $SCRIPT_DIR/test/verilator/verilator.f
+bender script verilator -t rtl > $SCRIPT_DIR/test/verilator/verilator.f
+
