@@ -14,32 +14,34 @@ workspace:
     dependencies/axi: axi
 
 sources:
-  - include_dirs:
-    - nvdla_hw
-    - nvdla_hw/vmod
-    - nvdla_hw/vmod/include
-    - nvdla_hw/vmod/vlibs
-    - nvdla_hw/vmod/nvdla
-    - nvdla_hw/vmod/nvdla/bdma
-    - nvdla_hw/vmod/nvdla/cacc
-    - nvdla_hw/vmod/nvdla/car
-    - nvdla_hw/vmod/nvdla/cbuf
-    - nvdla_hw/vmod/nvdla/cdma
-    - nvdla_hw/vmod/nvdla/cdp
-    - nvdla_hw/vmod/nvdla/cfgrom
-    - nvdla_hw/vmod/nvdla/cmac
-    - nvdla_hw/vmod/nvdla/csb_master
-    - nvdla_hw/vmod/nvdla/csc
-    - nvdla_hw/vmod/nvdla/glb
-    - nvdla_hw/vmod/nvdla/nocif
-    - nvdla_hw/vmod/nvdla/pdp
-    - nvdla_hw/vmod/nvdla/retiming
-    - nvdla_hw/vmod/nvdla/rubik
-    - nvdla_hw/vmod/nvdla/sdp
-    - nvdla_hw/vmod/nvdla/top
-    - nvdla_hw/vmod/rams/synth
+  - target: rtl 
 
-    target: rtl 
+    include_dirs:
+      - nvdla_hw
+      - nvdla_hw/vmod
+      - nvdla_hw/vmod/include
+      - nvdla_hw/vmod/vlibs
+      - nvdla_hw/vmod/nvdla
+      - nvdla_hw/vmod/nvdla/bdma
+      - nvdla_hw/vmod/nvdla/cacc
+      - nvdla_hw/vmod/nvdla/car
+      - nvdla_hw/vmod/nvdla/cbuf
+      - nvdla_hw/vmod/nvdla/cdma
+      - nvdla_hw/vmod/nvdla/cdp
+      - nvdla_hw/vmod/nvdla/cfgrom
+      - nvdla_hw/vmod/nvdla/cmac
+      - nvdla_hw/vmod/nvdla/csb_master
+      - nvdla_hw/vmod/nvdla/csc
+      - nvdla_hw/vmod/nvdla/glb
+      - nvdla_hw/vmod/nvdla/nocif
+      - nvdla_hw/vmod/nvdla/pdp
+      - nvdla_hw/vmod/nvdla/retiming
+      - nvdla_hw/vmod/nvdla/rubik
+      - nvdla_hw/vmod/nvdla/sdp
+      - nvdla_hw/vmod/nvdla/top
+      - nvdla_hw/vmod/rams/synth
+
+    
     
     defines:
       NVDLA_FEATURE_DATA_TYPE_INT8: ~
@@ -599,11 +601,11 @@ sources:
       - nvdla_hw/outdir/nv_small/vmod/vlibs/RANDFUNC.v
 
 
-  - include_dirs:
-    - intf
-    - src
+  - target: any(rtl,fpga)
+    include_dirs:
+      - intf
+      - src
 
-    target: any(rtl,fpga)
     files:
       - intf/hwpe_ctrl_intf_periph.sv
       - intf/nvdla_csb_intf.sv
@@ -699,7 +701,6 @@ sources:
       RAM_DISABLED_POWER_GATING_FPGA: ~
       DISABLE_TESTPOINTS: ~
 
-    target: fpga
     files:
       - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_128x18.v
       - nvdla_hw/outdir/nv_small/vmod/rams/fpga/small_rams/nv_ram_rws_128x256.v
