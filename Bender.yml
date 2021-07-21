@@ -693,6 +693,7 @@ sources:
       NVDLA_BPE_LOG2: 3
       NVDLA_MAC_RESULT_WIDTH: 19
       NVDLA_CC_ATOMC_DIV_ATOMK: 1
+      FPGA: ~
       PRAND_OFF: ~
       VLIB_BYPASS_POWER_CG: ~
       NV_FPGA_FIFOGEN: ~
