@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := default
-NVDLA_HW := ../../../nvdla_hw
+NVDLA_HW := $(HWPE_NVDLA_HOME)/nvdla_hw
 
 opendla: $(NVDLA_HW) $(NVDLA_HW)/outdir/nv_small/spec/manual/opendla.h
 	cp $(NVDLA_HW)/outdir/nv_small/spec/manual/opendla.h include
