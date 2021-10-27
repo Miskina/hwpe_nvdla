@@ -34,6 +34,8 @@ RUN apt-get update \
                     wget \
                     zlib1g-dev \
                     zlibc \
+                    ssh-client \
+                    ninja-build \
 && apt-get clean \
 && rm -rf /var/lib/apt/lists/*
 
@@ -65,5 +67,8 @@ RUN unset VERILATOR_ROOT \
 
 
 RUN cpan install Config::YAML XML::Simple Capture::Tiny
+
+WORKDIR /root/nvdla/hw
+RUN curl --proto '=https' --tlsv1.2 https://fabianschuiki.github.io/bender/init -sSf | sh
 
 WORKDIR /root

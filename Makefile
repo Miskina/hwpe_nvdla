@@ -5,12 +5,6 @@ CLEAN_ALL = $(addprefix clean_,nvdla bender verilator pulp_rt)
 
 DOCKER ?= 1
 
-check_dependencies:
-	@echo "Checking if you have the required dependencies installed"
-	./check_dependencies.sh
-
-.PHONY: check_dependencies
-
 init_submodules: .gitmodules
 	git submodule init
 
@@ -18,31 +12,55 @@ update_submodules: init_submodules
 	git submodule update
 
 ifeq (1, $(DOCKER))
+
+check_dependencies:
+	@echo "Checking if you have the required dependencies installed"
+	./check_dependencies.sh -d
+
 nvdla: update_submodules
 	@echo "Generating tree.make for NVDLA"
 	@echo "Building Verilog source for NVDLA"
 	docker-compose up nvdla-build
+
+verilator: check_dependencies bender nvdla
+	@echo "Setting up Verilator requirements"
+	./verilator_setup.sh /root/nvdla/hw
+	@echo "Building Verilator testbenches"
+	docker-compose up verilator-setup
+
+
+# bender:
+# 	@echo "Fetching bender dependencies"
+# 	docker-compose up bender-setup
 else
+
+
+check_dependencies:
+	@echo "Checking if you have the required dependencies installed"
+	./check_dependencies.sh
+
 nvdla: update_submodules
 	@echo "Generating tree.make for NVDLA"
 	make -C ./nvdla_hw USE_NV_ENV=1
 	@echo "Building Verilog sources for NVDLA"
 	cd nvdla_hw; ./tools/bin/tmake -build vmod
-endif
-
-bender: check_dependencies
-	@echo "Fetching bender dependencies"
-	bender update
-
-ips:
-	@echo "Updating IPs using IPApprox"
-	./update_ips.py
 
 verilator: check_dependencies bender nvdla
 	@echo "Setting up Verilator requirements"
 	./verilator_setup.sh
 	@echo "Building Verilator testbenches"
 	make -C test/verilator
+endif
+
+.PHONY: check_dependencies
+
+bender:
+	@echo "Fetching bender dependencies"
+	bender update
+
+ips:
+	@echo "Updating IPs using IPApprox"
+	./update_ips.py
 
 pulp_rt:
 	@echo "Generating required dependencies for PULP Runtime examples"
