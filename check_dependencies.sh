@@ -38,12 +38,16 @@ exists() {
 }
 
 if [ "$USING_DOCKER" -eq "0" ]; then
-    exists verilator 
+    exists verilator
     exists cmake
     exists java
     exists clang
     exists perl
+else
+    exists docker
+    exists docker-compose
 fi
+
 exists cpp
 exists make
 exists gcc
