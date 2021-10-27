@@ -62,7 +62,7 @@ ips:
 	@echo "Updating IPs using IPApprox"
 	./update_ips.py
 
-pulp_rt:
+pulprt:
 	@echo "Generating required dependencies for PULP Runtime examples"
 	make -C test/pulprt/nvdla
 
@@ -85,7 +85,7 @@ clean_verilator:
 	rm -f test/verilator/verilator.f
 	make -C test/verilator clean
 
-clean_pulp_rt:
+clean_pulprt:
 	@echo "Cleaning PULP Runtime example dependencies"
 	make -C test/pulprt/nvdla clean
 
@@ -106,7 +106,7 @@ help:
 	@echo " - nvdla              - Generates required files for NVDLA and generates NVDLA Verilog code."
 	@echo " - bender             - Uses the Bender tool to update dependencies."
 	@echo " - ips                - Uses the IPApprox tool to update dependencies - Not used in the 'all' rule, overwrites the bender ones and can break Verilator testbenches."
-	@echo " - pulp_rt            - Generates required dependencies (header files) for PULP Runtime examples."
+	@echo " - pulprt            - Generates required dependencies (header files) for PULP Runtime examples."
 	@echo " - verilator          - Generates files required in Verilator testbenches and builds the testbenches."
 	@echo " - all                - Run all of the above except for the 'ips' target."
 	@echo " - clean_<target>     - Cleans the specified <target>."
