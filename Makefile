@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := default
 
-ALL := check_dependencies init_submodules update_submodules nvdla bender verilator pulp_rt
-CLEAN_ALL = $(addprefix clean_,nvdla bender verilator pulp_rt)
+ALL := check_dependencies init_submodules update_submodules nvdla bender verilator pulprt
+CLEAN_ALL = $(addprefix clean_,nvdla bender verilator pulprt)
 
 DOCKER ?= 1
 
@@ -106,7 +106,7 @@ help:
 	@echo " - nvdla              - Generates required files for NVDLA and generates NVDLA Verilog code."
 	@echo " - bender             - Uses the Bender tool to update dependencies."
 	@echo " - ips                - Uses the IPApprox tool to update dependencies - Not used in the 'all' rule, overwrites the bender ones and can break Verilator testbenches."
-	@echo " - pulprt            - Generates required dependencies (header files) for PULP Runtime examples."
+	@echo " - pulprt             - Generates required dependencies (header files) for PULP Runtime examples."
 	@echo " - verilator          - Generates files required in Verilator testbenches and builds the testbenches."
 	@echo " - all                - Run all of the above except for the 'ips' target."
 	@echo " - clean_<target>     - Cleans the specified <target>."
