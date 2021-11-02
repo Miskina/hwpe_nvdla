@@ -1,10 +1,31 @@
+
+USE_NINJA := $(shell command -v ninja 2> /dev/null)
+
+
+ifndef USE_NINJA
+
 all:
-	cmake -B build; make -C build
+	@echo "Generating the required CMake files for the Verilator tests, using Make."
+	cmake -S . -B build
+	cmake --build build
+
+else
+
+all:
+	@echo "Generating the required CMake files for the Verilator tests, using Ninja."
+	cmake -G Ninja -S . -B build
+	cmake --build build
+endif
+
+
 clean:
 	rm -rf build
 	rm -rf bin
 	rm -rf lib
 	rm -rf arch
+
+default: all
+
 # PERIPH_TO_CSB currently not working using TB_PERIPH_TO_CSB
 # VERILATOR_TESTBENCHES := tb_periph_to_csb tb_periph_to_nvdla tb_hwpe_nvdla
 # 

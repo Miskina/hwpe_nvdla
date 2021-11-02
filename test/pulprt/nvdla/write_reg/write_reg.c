@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <pulp.h>
 #include <stdint.h>
-#include "../include/nvdla_registers.h"
 #include <hal/nvdla/nvdla.h>
+#include <opendla.h>
 
 #define BUFFER_SIZE 256
 

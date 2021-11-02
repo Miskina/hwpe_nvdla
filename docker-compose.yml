@@ -11,3 +11,8 @@ services:
         stdin_open: true
         volumes:
             - .:/root/nvdla/hw
+    verilator-setup:
+        build: .
+        command: bash -c "cd nvdla/hw && make -C test/verilator"
+        volumes:
+          - .:/root/nvdla/hw
