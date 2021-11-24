@@ -8,8 +8,7 @@ ifeq (1, $(DOCKER))
 
 DOCKER_COND = true
 
-nvdla/outdir: DOCKERFLAGS = -w /home/nvdla/hwpe_nvdla/hw/nvdla
-DOCKER_EXEC = docker-compose run $(DOCKERFLAGS) nvdla
+DOCKER_RUN = docker-compose run $(DOCKER_RUN_OPTIONS) nvdla
 
 DOCKER_USER_ID = $(shell id -u $(DOCKER_USER))
 DOCKER_GROUP_ID = $(shell getent group $(DOCKER_GROUP) | awk -F: '{printf "%d", $$3}')
@@ -32,11 +31,15 @@ update_submodules: init_submodules
 
 nvdla/tree.make: $(if $(DOCKER_COND), .env)
 	@echo "Generating tree.make for NVDLA"
-	@$(DOCKER_EXEC) make -C nvdla USE_NV_ENV=1
+	@$(DOCKER_RUN) make -C nvdla USE_NV_ENV=1
 
+nvdla/outdir: DOCKER_RUN_OPTIONS = --workdir /home/nvdla/hwpe_nvdla/hw/nvdla
 nvdla/outdir: nvdla/tree.make $(if $(DOCKER_COND), .env)
-	@echo "Building Verilog source for NVDLA"
-	@$(DOCKER_EXEC) tools/bin/tmake -build vmod
+	@echo "Building Verilog source and Verilator for NVDLA"
+ifndef DOCKER_COND
+	@cd nvdla
+endif
+	@$(DOCKER_RUN) ./tools/bin/tmake -build verilator
 
 nvdla: nvdla/outdir
 
@@ -50,7 +53,7 @@ test/verilator/%.f: %_setup.sh
 
 verilator: check_dependencies bender nvdla test/verilator/verilator.f test/verilator/verilator_nv_small.f
 	@echo "Building Verilator testbenches"
-	@$(DOCKER_EXEC) make -C test/verilator
+	@$(DOCKER_RUN) make -C test/verilator
 
 .bender:
 	@echo "Fetching bender dependencies"
