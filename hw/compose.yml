@@ -1,0 +1,11 @@
+services:
+    nvdla:
+        image: nvdla
+        build:
+            context: ..
+            args:
+                USER_ID: ${USER_ID:-0}
+                GROUP_ID: ${GROUP_ID:-0}
+        volumes:
+            - .:/home/nvdla/hwpe_nvdla/hw
+        working_dir: /home/nvdla/hwpe_nvdla/hw
