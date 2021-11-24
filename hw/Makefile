@@ -33,13 +33,9 @@ nvdla/tree.make: $(if $(DOCKER_COND), .env)
 	@echo "Generating tree.make for NVDLA"
 	@$(DOCKER_RUN) make -C nvdla USE_NV_ENV=1
 
-nvdla/outdir: DOCKER_RUN_OPTIONS = --workdir /home/nvdla/hwpe_nvdla/hw/nvdla
 nvdla/outdir: nvdla/tree.make $(if $(DOCKER_COND), .env)
 	@echo "Building Verilog source and Verilator for NVDLA"
-ifndef DOCKER_COND
-	@cd nvdla
-endif
-	@$(DOCKER_RUN) ./tools/bin/tmake -build verilator
+	@$(DOCKER_RUN) bash -c "pwd && cd nvdla && ./tools/bin/tmake -build verilator"
 
 nvdla: nvdla/outdir
 
