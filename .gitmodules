@@ -1,3 +1,9 @@
 [submodule "nvdla_hw"]
 	path = hw/nvdla
 	url = git@github.com:Miskina/nvdla_hw.git
+[submodule "renode/renode-verilator-integration"]
+	path = renode/renode-verilator-integration
+	url = git@github.com:antmicro/renode-verilator-integration.git
+[submodule "renode/renode"]
+	path = renode/renode
+	url = git@github.com:andrijadukic/renode.git

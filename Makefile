@@ -1,10 +1,14 @@
-all: submodules hw
+all: submodules hw renode
 
 submodules:
 	git submodule update --init --recursive
 
 hw:
 	$(MAKE) -C hw nvdla
+
+renode:
+	$(MAKE) -C renode
+
 clean: clean_hw clean_submodules
 
 clean_hw:
