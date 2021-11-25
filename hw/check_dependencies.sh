@@ -45,7 +45,7 @@ if [ "$USING_DOCKER" -eq "0" ]; then
     exists perl
 else
     exists docker
-    exists docker-compose
+    exists "docker compose"
 fi
 
 exists cpp

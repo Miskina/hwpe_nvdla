@@ -8,7 +8,7 @@ ifeq (1, $(DOCKER))
 
 DOCKER_COND = true
 
-DOCKER_RUN = docker-compose run $(DOCKER_RUN_OPTIONS) nvdla
+DOCKER_RUN = docker compose run $(DOCKER_RUN_OPTIONS) nvdla
 
 DOCKER_USER_ID = $(shell id -u $(DOCKER_USER))
 DOCKER_GROUP_ID = $(shell getent group $(DOCKER_GROUP) | awk -F: '{printf "%d", $$3}')
@@ -23,19 +23,13 @@ CLEAN_ALL = $(addprefix clean_, $(ALL))
 
 all: $(ALL)
 
-init_submodules: ../.gitmodules
-	git submodule init
-
-update_submodules: init_submodules
-	git submodule update
-
 nvdla/tree.make: $(if $(DOCKER_COND), .env)
 	@echo "Generating tree.make for NVDLA"
 	@$(DOCKER_RUN) make -C nvdla USE_NV_ENV=1
 
 nvdla/outdir: nvdla/tree.make $(if $(DOCKER_COND), .env)
 	@echo "Building Verilog source and Verilator for NVDLA"
-	@$(DOCKER_RUN) bash -c "pwd && cd nvdla && ./tools/bin/tmake -build verilator"
+	@$(DOCKER_RUN) bash -c "cd nvdla && ./tools/bin/tmake -build verilator"
 
 nvdla: nvdla/outdir
 
