@@ -1,0 +1,6 @@
+mach create
+machine LoadPlatformDescription @nvdla.repl
+sysbus LoadELF @nvdla_test
+sysbus.nvdla SimulationFilePath @../../../peripherals/nvdla/build/Vtop
+machine StartGdbServer 3333
+
