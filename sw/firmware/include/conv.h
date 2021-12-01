@@ -24,7 +24,7 @@ void dla_get_conv_stats(struct dla_conv_stats* conv_stats);
 
 #endif // DLA_CONV_MEASURE_STAT
 
-struct dla_conv_point
+struct dla_conv_vec
 {
     uint32_t x;
     uint32_t y;
@@ -60,8 +60,8 @@ struct dla_conv_op_desc
     uint32_t shift;
     uint32_t mask;
 
-    struct dla_conv_point stride;
-    struct dla_conv_point pad;
+    struct dla_conv_vec stride;
+    struct dla_conv_vec pad;
 
     struct dla_conv_addr address;
 
