@@ -1,0 +1,36 @@
+---
+Language:        Cpp
+BasedOnStyle:  LLVM
+IndentWidth: 4
+# AlignConsecutiveAssignments: true
+# AlignConsecutiveStyle: Consecutive
+# AlignConsecutiveBitFields: true
+# AlignConsecutiveMacros: true
+# AlignOperands: true
+# OperandAlignmentStyle: Align
+BreakBeforeBinaryOperators: None
+BreakBeforeBraces:
+PointerAlignment: Left
+BreakBeforeBraces: Allman #Custom
+# BraceWrapping:
+#   AfterCaseLabel:  true
+#   AfterClass:      true
+#   AfterControlStatement: true
+#   AfterEnum:       true
+#   AfterFunction:   true
+#   AfterNamespace:  true
+#   AfterObjCDeclaration: true
+#   AfterStruct:     true
+#   AfterUnion:      true
+#   AfterExternBlock: true
+#   BeforeCatch:     true
+#   BeforeElse:      true
+#   IndentBraces:    false
+#   SplitEmptyFunction: false
+#   SplitEmptyRecord: false
+#   SplitEmptyNamespace: false
+BreakConstructorInitializers: BeforeColon
+BreakInheritanceList: BeforeColon
+BreakBeforeTernaryOperators: false
+AllowShortLambdasOnASingleLine: All
+...
