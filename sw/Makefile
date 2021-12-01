@@ -28,5 +28,5 @@ all: generate
 generate:
 	$(CMAKE) -B build -S . $(if $(USE_NINJA),-G Ninja)
 
-clean: build
+clean:
 	rm -rf build
