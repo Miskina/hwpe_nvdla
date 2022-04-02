@@ -7,4 +7,4 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/lib)
 
 option(FIRMWARE "Build the NVDLA firmware" ON)
 
-# add_subdirectory(firmware)
+add_subdirectory(firmware)

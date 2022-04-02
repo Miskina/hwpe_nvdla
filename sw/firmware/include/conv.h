@@ -99,6 +99,7 @@ struct dla_conv_op_desc
     DLA_MACRO_END                            \
 
 
+int32_t dla_setup_conv(dla_conv_op* conv_op);
 
 
 
